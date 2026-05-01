@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>양자 얽힘 · Quantum Entanglement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ff-kr:   "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+    --ff-en:   "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --ff-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+    --ink: #000;
+    --accent: #007AFD;       /* blue accent from SVG */
+    --accent-lt: #6db3ff;    /* lighter blue */
+    --paper: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; background: #fff; overflow: hidden; }
+  body { font-family: var(--ff-en); color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+  /* ───── letterbox + scale ───── */
+  .stage { position: fixed; inset: 0; background: #fff; overflow: hidden; }
+  .canvas {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 1920px; height: 1080px;
+    background: var(--paper);
+    overflow: hidden;
+  }
+
+  /* ───── decorative molecule circles ───── */
+  .mol-layer {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    /* z-index 제거: 화면 위로 입자가 올라오도록 stacking context 분리 안함 */
+  }
+  .mol {
+    position: absolute;
+    border-radius: 50%;
+    background: #757575;
+    opacity: 0.2;
+    will-change: transform;
+    transition: opacity 0.4s ease, background 0.4s ease, box-shadow 0.4s ease, transform 4s cubic-bezier(.2,.8,.3,1);
+  }
+  .mol.is-entangled {
+    opacity: 1;
+    background:
+      radial-gradient(circle at 34% 30%,
+        #ffffff 0%,
+        var(--accent-lt) 35%,
+        var(--accent) 75%,
+        #004fc8 100%);
+    box-shadow:
+      inset 0 0 16px rgba(255,255,255,0.5),
+      inset -4px -8px 18px rgba(0,60,160,0.4),
+      0 8px 28px rgba(0,122,253,0.30);
+    z-index: 6;
+  }
+
+  /* ───── entangled-pair visual layer ───── */
+  .pairs-layer {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    z-index: 6;
+  }
+  .ent-particle {
+    position: absolute;
+    width: 48px; height: 48px;
+    margin-left: -24px; margin-top: -24px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 34% 30%,
+        #ffffff 0%,
+        var(--accent-lt) 35%,
+        var(--accent) 75%,
+        #004fc8 100%);
+    box-shadow:
+      inset 0 0 16px rgba(255,255,255,0.5),
+      inset -4px -8px 18px rgba(0,60,160,0.4),
+      0 8px 28px rgba(0,122,253,0.30);
+    will-change: transform;
+  }
+  .ent-line {
+    position: absolute;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .ent-line line {
+    stroke: var(--accent);
+    stroke-width: 2;
+    stroke-dasharray: 8 6;
+    opacity: 0.4;
+  }
+
+  /* ───── screen container ───── */
+  .screen {
+    position: absolute; inset: 0;
+    z-index: 3;
+    padding: 72px 88px 120px 88px;
+    display: none;
+    opacity: 0;
+    transition: opacity 350ms ease;
+  }
+  .screen.is-active { display: block; opacity: 1; }
+
+  /* ───── MAIN screen ───── */
+  .main { padding: 120px 80px 120px 80px; }
+  .main .title-kr {
+    font-family: var(--ff-kr);
+    font-weight: 400;
+    font-size: 500px;
+    line-height: 0.82;
+    letter-spacing: -0.05em;
+    color: var(--ink);
+    position: relative;
+    z-index: 2;
+    margin-left: -30px;
+    margin-top: -80px;
+    /* white-space: nowrap; 제거 */
+  }
+  .main .title-en {
+    font-family: var(--ff-mono);
+    font-weight: 400;
+    font-size: 150px;
+    line-height: 0.85;
+    letter-spacing: -0.03em;
+    margin-top: 60px;
+    color: var(--ink);
+    position: relative;
+    z-index: 2;
+  }
+  .main .body-kr {
+    font-family: var(--ff-kr);
+    font-weight: 400;
+    font-size: 80px;
+    line-height: 1.5;
+    color: var(--ink);
+    margin-top: 100px;
+    max-width: 1600px;
+    position: relative;
+    z-index: 3;
+    letter-spacing: -0.01em;
+  }
+  .main .body-kr .em {
+    background: var(--accent);
+    color: var(--paper);
+    padding: 0 6px;
+  }
+
+  /* ───── STATS screen ───── */
+  .stats { padding: 120px 80px 120px 80px; }
+  .stats .stat-row {
+    display: grid;
+    grid-template-columns: 1fr minmax(450px, auto);
+    align-items: end;
+    gap: 30px;
+    margin-top: 0;
+  }
+  .stats .stat-label-kr {
+    font-family: var(--ff-kr);
+    font-weight: 400;
+    font-size: 220px;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .stats .stat-label-en {
+    font-family: var(--ff-mono);
+    font-weight: 400;
+    font-size: 120px;
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    margin-top: 10px;
+  }
+  .stats .stat-value {
+    font-family: var(--ff-mono);
+    font-weight: 400;
+    font-size: 400px;
+    line-height: 0.8;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    text-align: right;
+  }
+  .stats .stat-block { position: relative; z-index: 3; }
+  .stats .stat-block + .stat-block { margin-top: 80px; }
+
+  /* ───── DESCRIPTION screen ───── */
+  .desc { padding: 120px 80px 120px 80px; }
+  .desc .d-row {
+    font-family: var(--ff-kr);
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    position: relative;
+    z-index: 2;
+  }
+  .desc .d1 {
+    font-size: 600px;
+    margin-top: -80px;
+    margin-left: -30px;
+    white-space: nowrap;
+  }
+  .desc .d-en {
+    font-family: var(--ff-mono);
+    font-weight: 400;
+    font-size: 240px;
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    margin-top: 80px;
+    position: relative;
+    z-index: 2;
+    white-space: normal;
+    max-width: 1400px;
+  }
+  .desc .d3 {
+    font-size: 600px;
+    font-family: var(--ff-kr);
+    font-weight: 400;
+    margin-top: -50px;
+    text-align: right;
+    position: relative;
+    z-index: 2;
+    letter-spacing: -0.04em;
+  }
+  .desc .legend {
+    font-family: var(--ff-kr);
+    font-weight: 400;
+    font-size: 56px;
+    line-height: 1.5;
+    color: var(--ink);
+    position: absolute;
+    left: 80px;
+    bottom: 260px;
+    z-index: 3;
+    letter-spacing: -0.005em;
+  }
+
+  /* ───── mode bar (bottom) ───── */
+  .mode-bar {
+    position: absolute;
+    left: 80px; right: 80px; bottom: 30px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--ff-mono);
+    font-weight: 400;
+    font-size: 42px;
+    z-index: 5;
+    color: #c9c9c9;
+  }
+  .mode-bar .m {
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.2s ease;
+  }
+  .mode-bar .m:hover { color: #fff; }
+  .mode-bar .m.active {
+    color: var(--accent);
+    text-transform: uppercase;
+    font-size: 64px;
+    letter-spacing: 0.04em;
+    line-height: 1.05;
+  }
+  .mode-bar .m .label { display: block; }
+
+  /* ───── HUD (top-right camera status) ───── */
+  .hud {
+    position: absolute; top: 25px; right: 80px;
+    font-family: var(--ff-mono); font-weight: 400; font-size: 26px;
+    z-index: 10; display: flex; align-items: center; gap: 14px;
+  }
+  .hud .dot { width: 12px; height: 12px; border-radius: 50%; background: #bbb; transition: background 180ms ease; }
+  .hud.is-detected .dot { background: var(--accent); box-shadow: 0 0 0 4px rgba(0,122,253,0.3); }
+
+  /* enable-camera button */
+  .page-counter {
+    position: absolute; top: 25px; left: 300px;
+    font-family: var(--ff-mono); font-weight: 400; font-size: 22px;
+    color: #888; z-index: 10;
+  }
+  .cam-btn {
+    position: absolute; top: 21px; left: 80px;
+    font-family: var(--ff-mono); font-size: 22px; padding: 12px 18px;
+    border: 1px solid #000; background: #fff; z-index: 20; cursor: pointer;
+  }
+  .cam-btn:hover { background: #000; color: #fff; }
+  .cam-btn.hidden { display: none; }
+
+  /* entanglement burst */
+  @keyframes ent-burst {
+    0%   { transform: scale(0.3); opacity: 0.9; }
+    100% { transform: scale(3.2); opacity: 0; }
+  }
+  .burst {
+    position: absolute;
+    width: 120px; height: 120px;
+    margin-left: -60px; margin-top: -60px;
+    border: 3px solid var(--accent);
+    border-radius: 50%;
+    animation: ent-burst 700ms ease-out forwards;
+    pointer-events: none;
+    z-index: 7;
+  }
+
+  /* particle link animation */
+  @keyframes link-pulse {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.8; }
+  }
+  .ent-line line {
+    animation: link-pulse 2s ease-in-out infinite;
+  }
+
+  /* floating molecule animation */
+  @keyframes mol-float {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(8px, -12px); }
+    50% { transform: translate(-6px, -8px); }
+    75% { transform: translate(10px, 6px); }
+    100% { transform: translate(0, 0); }
+  }
+
+</style>
+</head>
+<body data-screen-label="Quantum Entanglement · 2-finger mode">
+<div class="stage">
+  <div class="canvas" id="canvas">
+
+    <!-- decorative molecule circles -->
+    <div class="mol-layer" id="molLayer"></div>
+
+    <!-- entangled pairs visual layer -->
+    <div class="pairs-layer" id="pairsLayer"></div>
+
+    <!-- DETAILED AS DESCRIPTION -->
+    <section class="screen main" data-screen="main" data-screen-label="03 Description">
+      <h1 class="title-kr">양자 얽힘</h1>
+      <div class="title-en">QUANTUM ENTANGLEMENT</div>
+      <p class="body-kr">
+        두 입자가 한 번 얽히면, 아무리 멀리 떨어져 있어도<br>
+        하나를 관측하는 순간 다른 하나의 <span class="em">상태가 결정</span>된다.<br>
+        공간을 무시하는 이 '유령 같은 원격 작용'은<br>
+        양자역학에서 가장 기이하고 아름다운 현상이다.
+      </p>
+    </section>
+
+    <!-- STATS -->
+    <section class="screen stats" data-screen="stats" data-screen-label="02 Stats">
+      <div class="stat-block">
+        <div class="stat-row">
+          <div>
+            <div class="stat-label-kr">총 얽힘 생성</div>
+            <div class="stat-label-en">TOTAL--<br>ENTANGLEMENTS</div>
+          </div>
+          <div class="stat-value" id="statEnt">0</div>
+        </div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-row">
+          <div>
+            <div class="stat-label-kr">평균 상관 거리</div>
+            <div class="stat-label-en">AVG.--<br>CORRELATION DIST.</div>
+          </div>
+          <div class="stat-value" id="statDist">--</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ARTISTIC AS MAIN -->
+    <section class="screen desc is-active" data-screen="desc" data-screen-label="01 Main">
+      <div class="d-row d1">양자—</div>
+      <div class="d-en">QUANTUM<br>ENTANGLEMENT</div>
+      <div class="d-row d3">얽힘</div>
+      <div class="legend">
+        설명_ 엄지 척<br>
+        얽힘 생성_ 엄지와 검지로 꼬집기
+      </div>
+    </section>
+
+    <!-- top chrome -->
+    <div class="page-counter" id="pageCounter">01 / 03 · MAIN</div>
+    <div class="hud" id="hud"><span class="dot"></span><span id="hudLabel">CAM · AWAITING GESTURE</span></div>
+    <button class="cam-btn" id="camBtn">ENABLE CAMERA</button>
+
+    <!-- mode bar -->
+    <nav class="mode-bar">
+      <a href="Wavefunction_Collapse.html" class="m"><span class="label">1finger</span></a>
+      <a href="Quantum_Entanglement.html" class="m active"><span class="label">QUANTUM</span><span class="label">ENTANGLEMENT</span></a>
+      <a href="Uncertainty_Principle.html" class="m"><span class="label">3finger</span></a>
+      <a href="Quantum_Tunneling.html" class="m"><span class="label">4finger</span></a>
+    </nav>
+
+  </div>
+</div>
+
+<video id="cam" playsinline muted autoplay style="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none"></video>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js" crossorigin="anonymous"></script>
+<script src="qe.js"></script>
+</body>
+</html>

@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>미시세계 — Sequence 02→06</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Bodoni+Moda:ital,wght@0,400;0,700;0,900;1,700;1,900&family=DM+Serif+Display:ital@0;1&family=Abril+Fatface&family=Bungee&family=Bungee+Shade&family=Monoton&family=Rubik+Mono+One&family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,700&family=Space+Mono:wght@400;700&family=Caveat:wght@500;700&family=Homemade+Apple&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --canvas-w: 1728px;
+    --canvas-h: 1117px;
+    --ink: #000000;
+    --paper: #ffffff;
+
+    /* Helvetica-first English stack */
+    --ff-helv:  "Helvetica Neue", Helvetica, "Arial", sans-serif;
+    --ff-helvb: "Helvetica Neue", Helvetica, "Arial Black", sans-serif;
+    --ff-serif: "Bodoni Moda", "DM Serif Display", "Times New Roman", serif;
+    --ff-fat:   "Abril Fatface", "Bodoni Moda", serif;
+    --ff-stencil: "Bungee", "Helvetica Neue", sans-serif;
+    --ff-shade: "Bungee Shade", "Bungee", serif;
+    --ff-outline: "Monoton", "Helvetica Neue", sans-serif;
+    --ff-mono:  "IBM Plex Mono", "Space Mono", ui-monospace, monospace;
+    --ff-dot:   "Rubik Mono One", "Helvetica Neue", sans-serif;
+    --ff-script: "Caveat", "Homemade Apple", cursive;
+    --ff-script2: "Homemade Apple", "Caveat", cursive;
+
+    /* Korean: Noto Sans KR */
+    --ff-kr:    "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+  }
+
+  /* ───────── Consistent typography variants ───────── */
+  .mix .ch.v-en { font-family: var(--ff-mono); font-weight: 400; }
+  .mix .ch.v-mono { font-family: var(--ff-mono); font-weight: 400; }
+  .mix .ch.v-kr { font-family: var(--ff-kr); font-weight: 400; }
+
+  /* stroke-only (outlined) char */
+  .mix .ch.v-stroke {
+    color: transparent;
+    -webkit-text-stroke: 2px #000;
+  }
+  /* dotted fill via background-clip */
+  .mix .ch.v-dots {
+    color: transparent;
+    background-image: radial-gradient(#000 30%, transparent 32%);
+    background-size: 0.14em 0.14em;
+    background-position: center;
+    -webkit-background-clip: text;
+            background-clip: text;
+  }
+  /* Korean variant weights */
+  .mix .ch.v-kr-blk { font-family: var(--ff-kr); font-weight: 900; }
+
+  /* Size / baseline variants (apply on top of font variant) */
+  .mix .ch.s-sm  { font-size: 0.72em; transform-origin: center bottom; }
+  .mix .ch.s-md  { font-size: 0.88em; }
+  .mix .ch.s-lg  { font-size: 1.12em; }
+  .mix .ch.s-xl  { font-size: 1.24em; letter-spacing: -0.02em; }
+  /* baseline jitter (applied as margin so layout flows, not transform — plays nice with gather animation) */
+  .mix .ch.y-up   { position: relative; top: -0.08em; }
+  .mix .ch.y-dn   { position: relative; top:  0.06em; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+    color: var(--ink);
+    font-family: var(--ff-helv);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .stage {
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .canvas {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: var(--canvas-w);
+    height: var(--canvas-h);
+    background: var(--paper);
+    overflow: hidden;
+  }
+
+  /* ───────── slide baseline ───────── */
+  .slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 900ms linear;
+  }
+  .slide.is-active { opacity: 1; }
+
+  /* shared text defaults */
+  .kr-display { font-family: var(--ff-kr); font-weight: 400; color: #000; line-height: 1; }
+  .en-display { font-family: var(--ff-mono); font-weight: 400; color: #000; line-height: 1; letter-spacing: -0.02em; }
+  .en-mono    { font-family: var(--ff-mono); color: #000; line-height: 1.05; font-weight: 400; }
+
+  /* Per-character scatter animation.
+     Each character is wrapped in a <span class="ch"> whose --tx/--ty/--rot
+     are seeded once via JS. A keyframe sweeps scale + offset + blur. */
+  .ch {
+    display: inline-block;
+    transform-origin: center center;
+    will-change: transform, opacity, filter;
+    letter-spacing: 0;
+    word-spacing: 0;
+    /* inherit exact metrics to avoid Hangul gap artefacts */
+    font: inherit;
+    line-height: inherit;
+    vertical-align: baseline;
+  }
+  [data-scatter] {
+    letter-spacing: 0;
+    word-spacing: 0;
+  }
+
+  /* entry: gather (from scattered to rest) */
+  .slide.is-active .ch {
+    animation: gather 1100ms cubic-bezier(.2,.7,.2,1) both;
+  }
+  /* exit: scatter */
+  .slide.is-exiting .ch {
+    animation: scatter 900ms cubic-bezier(.6,.1,.9,.4) both;
+  }
+  /* stagger via --i (set by JS) */
+  .ch {
+    animation-delay: calc(var(--i, 0) * 8ms);
+  }
+
+  @keyframes gather {
+    0% {
+      opacity: 0;
+      transform: translate(var(--tx, 0px), var(--ty, 0px)) rotate(var(--rot, 0deg)) scale(1.25);
+      filter: blur(14px);
+    }
+    60% {
+      opacity: 1;
+      filter: blur(2px);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(0, 0) rotate(0) scale(1);
+      filter: blur(0);
+    }
+  }
+  @keyframes scatter {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0) rotate(0) scale(1);
+      filter: blur(0);
+    }
+    40% {
+      opacity: 0.8;
+      filter: blur(3px);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--tx, 0px), var(--ty, 0px)) rotate(var(--rot, 0deg)) scale(0.85);
+      filter: blur(18px);
+    }
+  }
+
+  /* ───────── SLIDE 02 — MICRO / MACRO / SCOPIC ───────── */
+  .s02 .row {
+    position: absolute;
+    left: 80px;
+    display: flex;
+    align-items: center;
+    gap: 60px;
+  }
+  .s02 .r1 { top: 140px;  }
+  .s02 .r2 { top: 460px; }
+  .s02 .big {
+    font-family: var(--ff-mono);
+    font-weight: 400;
+    font-size: 360px;
+    line-height: 0.9;
+    color: #000;
+    letter-spacing: -0.06em;
+  }
+  .s02 .side {
+    font-family: var(--ff-kr);
+    font-weight: 400;
+    font-size: 80px;
+    line-height: 1.1;
+    white-space: nowrap;
+    color: #000;
+  }
+  .s02 .scopic {
+    position: absolute;
+    left: 80px;
+    top: 760px;
+    font-family: var(--ff-mono);
+    font-weight: 400;
+    font-size: 460px;
+    line-height: 0.8;
+    color: #000;
+    letter-spacing: -0.07em;
+  }
+
+  /* ───────── SLIDE 03 — FORMS SCATTER ───────── */
+  .s03 .kr1 {
+    position: absolute; left: 80px; top: 140px;
+    font-family: var(--ff-kr); font-weight: 400; font-size: 380px; line-height: 0.85; color: #000;
+    letter-spacing: -0.05em;
+  }
+  .s03 .en-forms {
+    position: absolute; left: 1100px; top: 220px;
+    font-family: var(--ff-mono); font-weight: 400; font-size: 160px; color: #000; letter-spacing: -0.03em;
+  }
+  .s03 .en-scatter {
+    position: absolute; left: 80px; top: 460px;
+    font-family: var(--ff-mono); font-weight: 400; font-size: 130px; line-height: 1; color: #000; letter-spacing: -0.03em;
+    white-space: nowrap;
+  }
+  .s03 .kr2 {
+    position: absolute; left: 860px; top: 460px;
+    font-family: var(--ff-kr); font-weight: 400; font-size: 380px; line-height: 1; color: #8f8f8f;
+    filter: blur(8px); opacity: 0.55; letter-spacing: -0.05em;
+  }
+  .s03 .kr3 {
+    position: absolute; left: 80px; top: 760px;
+    font-family: var(--ff-kr); font-weight: 400; font-size: 400px; line-height: 0.8; color: #000;
+    letter-spacing: -0.06em;
+  }
+  .s03 .en-prob {
+    position: absolute; left: 1260px; top: 800px;
+    font-family: var(--ff-mono); font-weight: 400; font-size: 110px; line-height: 1; color: #b9b9b9; letter-spacing: -0.03em;
+    white-space: nowrap; filter: blur(3px);
+  }
+
+  /* ───────── SLIDE 04 — INFORMATION DETERMINED ───────── */
+  .s04 { color: #000; }
+  .s04 .stack {
+    position: absolute;
+    left: 50%; top: 55%;
+    transform: translate(-50%, -50%);
+    display: flex; flex-direction: column;
+    gap: 40px;
+    align-items: flex-start;
+    width: 100%;
+    padding: 0 80px;
+  }
+  .s04 .row {
+    display: flex; align-items: baseline; gap: 40px;
+    white-space: nowrap;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .s04 .k-lg { font-family: var(--ff-kr); font-weight: 400; font-size: 320px; line-height: 0.85; letter-spacing: -0.06em; }
+  .s04 .e-sm {
+    font-family: var(--ff-mono); font-weight: 400;
+    font-size: 100px; line-height: 1; white-space: pre; letter-spacing: -0.02em;
+    transform: translateY(-20px);
+  }
+
+  /* ───────── SLIDE 05 ───────── */
+  .s05 .row {
+    position: absolute;
+    display: flex; align-items: baseline;
+    gap: 28px; white-space: nowrap;
+  }
+  .s05 .k-sm { font-family: var(--ff-kr); font-weight: 400; font-size: 90px;  line-height: 1; }
+  .s05 .k-lg { font-family: var(--ff-kr); font-weight: 400; font-size: 180px; line-height: 1; }
+  .s05 .e-sm {
+    font-family: var(--ff-mono); font-weight: 400;
+    font-size: 58px; line-height: 1; letter-spacing: -0.02em;
+    transform: translateY(-12px);
+  }
+  .s05 .e-md {
+    font-family: var(--ff-mono); font-weight: 400;
+    font-size: 88px; line-height: 1; letter-spacing: -0.03em;
+    transform: translateY(-20px);
+  }
+  .s05 .r-a { left: 80px;  top: 140px; }
+  .s05 .r-b { left: 80px;  top: 340px; }
+  .s05 .r-c { left: 300px; top: 580px; }
+  .s05 .r-d { left: 220px; top: 820px; }
+
+  /* ───────── SLIDE 06 — WELCOME ───────── */
+  .s06 .kr-title {
+    position: absolute; left: 80px; top: 140px;
+    font-family: var(--ff-kr); font-weight: 400; font-size: 460px; line-height: 0.82; color: #000;
+    letter-spacing: -0.06em;
+  }
+  .s06 .entering {
+    position: absolute; left: 80px; top: 560px;
+    font-family: var(--ff-mono); font-weight: 400; font-size: 130px; line-height: 1; color: #000; letter-spacing: -0.03em;
+    white-space: nowrap;
+  }
+  .s06 .welcome {
+    position: absolute; left: 960px; top: 580px;
+    font-family: var(--ff-kr); font-weight: 400; font-size: 260px; line-height: 0.9; color: #000;
+    letter-spacing: -0.05em;
+    white-space: nowrap;
+  }
+
+  /* ───────── SLIDE 01 (intro) ───────── */
+  .s01 .kr-huge {
+    position: absolute; left: 50%; top: 140px;
+    transform: translateX(-50%);
+    font-family: var(--ff-kr); font-weight: 400; font-size: 400px; line-height: 0.9; color: #000;
+    letter-spacing: -0.06em;
+    white-space: nowrap;
+  }
+  .s01 .en-sub {
+    position: absolute; left: 50%; top: 540px;
+    transform: translateX(-50%);
+    font-family: var(--ff-mono); font-weight: 400; font-size: 180px; line-height: 0.9; color: #000;
+    letter-spacing: -0.04em;
+  }
+  .s01 .hint {
+    position: absolute; left: 50%; bottom: 140px;
+    transform: translateX(-50%);
+    font-family: var(--ff-kr); font-weight: 400; font-size: 38px; line-height: 1.55; color: #000;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .s01 .hint .pulse {
+    display: inline-block;
+    animation: hint-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes hint-pulse { 0%,100% { opacity: .35; } 50% { opacity: 1; } }
+
+  /* ───────── SLIDE 07 (coming soon placeholder) ───────── */
+  .s07 {
+    display: grid; place-items: center; align-content: center; gap: 30px;
+  }
+  .s07 .label-sm {
+    font-family: var(--ff-mono); font-weight: 400;
+    font-size: 54px; color: #000; letter-spacing: 0.08em;
+    text-align: center;
+  }
+  .s07 .label-big {
+    font-family: var(--ff-mono); font-weight: 400;
+    font-size: 200px; color: #000;
+    letter-spacing: -0.04em; text-align: center;
+  }
+
+  /* ───────── SLIDE 08 — 4 INTERVENTIONS ───────── */
+  .s08 .kr1 {
+    position: absolute; left: 80px; top: 140px;
+    font-family: var(--ff-kr); font-weight: 400; font-size: 380px; line-height: 0.85; color: #000;
+    letter-spacing: -0.05em;
+  }
+  .s08 .en-forms {
+    position: absolute; left: 1040px; top: 220px;
+    font-family: var(--ff-mono); font-weight: 400; font-size: 160px; color: #000; letter-spacing: -0.03em;
+  }
+  .s08 .en-scatter {
+    position: absolute; left: 80px; top: 460px;
+    font-family: var(--ff-mono); font-weight: 400; font-size: 130px; line-height: 1; color: #000; letter-spacing: -0.03em;
+    white-space: nowrap;
+  }
+  .s08 .kr2 {
+    position: absolute; left: 820px; top: 460px;
+    font-family: var(--ff-kr); font-weight: 400; font-size: 380px; line-height: 1; color: #000;
+    opacity: 0.8; letter-spacing: -0.05em;
+  }
+  .s08 .kr3 {
+    position: absolute; left: 80px; top: 760px;
+    font-family: var(--ff-kr); font-weight: 400; font-size: 300px; line-height: 0.8; color: #000;
+    letter-spacing: -0.06em;
+    white-space: nowrap;
+  }
+  .hud {
+    position: absolute; top: 30px; right: 40px;
+    font-family: var(--ff-mono); font-weight: 400; font-size: 26px;
+    z-index: 10; display: flex; align-items: center; gap: 14px;
+  }
+  .hud .dot { width: 12px; height: 12px; border-radius: 50%; background: #bbb; transition: background 180ms ease; }
+  .hud.is-detected .dot { background: var(--hot); box-shadow: 0 0 0 4px rgba(255,44,122,0.3); }
+
+  .progress {
+    position: absolute;
+    left: 40px; bottom: 30px; right: 40px;
+    height: 3px; background: #eaeaea; z-index: 10;
+  }
+  .progress .bar {
+    height: 100%; background: #000; width: 0%;
+    transition: width 120ms linear;
+  }
+  .counter {
+    position: absolute; top: 30px; left: 40px;
+    font-family: var(--ff-mono); font-weight: 400; font-size: 22px;
+    color: #888; z-index: 10;
+  }
+
+</style>
+</head>
+<body data-chapter="intro">
+  <div class="stage">
+    <div class="canvas" id="canvas" data-screen-label="Sequence 02 → 06">
+
+      <!-- SLIDE 00 (Micro/Macro Selection) -->
+      <section class="slide s02 mix" data-slide="0" data-screen-label="01 Micro Macro Scopic">
+        <div class="row r1">
+          <div class="big" data-scatter>MICRO</div>
+          <div class="side" data-scatter>미시세계_
+1을 만드십시오.</div>
+        </div>
+        <div class="row r2">
+          <div class="big" data-scatter>MACRO</div>
+          <div class="side" data-scatter>거시세계_
+2를 만드십시오.</div>
+        </div>
+        <div class="scopic" data-scatter>SCOPIC</div>
+      </section>
+
+      <!-- SLIDE 01 (Welcome to Microscopic) -->
+      <section class="slide s06 mix" data-slide="1" data-screen-label="02 Welcome to microscopic">
+        <div class="kr-title" data-scatter>미시세계</div>
+        <div class="entering" data-scatter>ENTERING--
+THE MICRO-
+SCOPIC</div>
+        <div class="welcome" data-scatter>오신 걸
+환영합니다.</div>
+      </section>
+
+      <!-- SLIDE 02 (Classic order collapses) -->
+      <section class="slide s05 mix" data-slide="2" data-screen-label="03 Classic order collapses">
+        <div class="row r-a">
+          <span class="k-sm" data-scatter>여기서</span>
+          <span class="e-sm" data-scatter>IN HERE,</span>
+        </div>
+        <div class="row r-b">
+          <span class="k-lg" data-scatter>고전적</span>
+          <span class="e-md" data-scatter>CLASSIC</span>
+        </div>
+        <div class="row r-c">
+          <span class="e-md" data-scatter>ORDER</span>
+          <span class="k-lg" data-scatter>질서는</span>
+        </div>
+        <div class="row r-d">
+          <span class="k-lg" data-scatter>무너집니다.</span>
+          <span class="e-md" data-scatter>COLLAPSES.</span>
+        </div>
+      </section>
+
+      <!-- SLIDE 03 (Forms scatter into probabilities) -->
+      <section class="slide s03 mix" data-slide="3" data-screen-label="04 Forms scatter into probabilities">
+        <div class="kr1" data-scatter>형태는</div>
+        <div class="en-forms" data-scatter>FORMS</div>
+        <div class="en-scatter" data-scatter>SCATTER--
+INTO</div>
+        <div class="kr2" data-scatter data-nomix>확률로</div>
+        <div class="kr3" data-scatter>흩어지고,</div>
+        <div class="en-prob" data-scatter data-nomix>PROBAB-
+ILITIES,</div>
+      </section>
+
+      <!-- SLIDE 04 (Information forcibly determined) -->
+      <section class="slide s04 mix" data-slide="4" data-screen-label="05 Information forcibly determined">
+        <div class="stack">
+          <div class="row">
+            <span class="k-lg" data-scatter>정</span>
+            <span class="e-sm" data-scatter>INFOR-
+MATION</span>
+            <span class="k-lg" data-scatter>보</span>
+            <span class="e-sm" data-scatter>IS</span>
+            <span class="k-lg" data-scatter>는</span>
+          </div>
+          <div class="row">
+            <span class="k-lg" data-scatter>[관측]에 의</span>
+          </div>
+          <div class="row">
+            <span class="k-lg" data-scatter>해 강제</span>
+            <span class="e-sm" data-scatter>FORCIBLY--
+DETERMINED</span>
+            <span class="k-lg" data-scatter>됩</span>
+          </div>
+          <div class="row">
+            <span class="k-lg" data-scatter>니</span>
+            <span class="e-sm" data-scatter>BY--
+OBSERVATION.</span>
+            <span class="k-lg" data-scatter>다.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 4.5 (4 Physical Interventions Stand By) -->
+      <section class="slide s08 mix" data-slide="5" data-screen-label="06 4 physical interventions">
+        <div class="kr1" data-scatter>4개의</div>
+        <div class="en-forms" data-scatter>FOUR--
+PHYSICAL</div>
+        <div class="en-scatter" data-scatter>INTERVENTIONS
+STAND BY.</div>
+        <div class="kr2" data-scatter data-nomix>물리적</div>
+        <div class="kr3" data-scatter>개입이 대기 중입니다.</div>
+      </section>
+
+      <!-- SLIDE 05 (Intro - Outro/Restart) -->
+      <section class="slide s01 mix" data-slide="6" data-screen-label="07 Intro — raise 1 or 2 fingers">
+        <div class="kr-huge" data-scatter>미시세계</div>
+        <div class="en-sub" data-scatter>MICOROSCOPIC</div>
+        <div class="hint" data-scatter>시작_ 엄지 척
+뒤로가기_ 손바닥 펴기</div>
+      </section>
+
+      <!-- SLIDE 06 (Coming Soon - Macro branch) -->
+      <section class="slide s07 mix" data-slide="6" data-screen-label="07 Next chapter placeholder">
+        <div class="label-sm" data-scatter>NEXT CHAPTER</div>
+        <div class="label-big" data-scatter>coming soon</div>
+      </section>
+
+    </div><!-- end canvas -->
+    
+    <!-- Global HUD (moved outside canvas to avoid cropping) -->
+    <div class="hud" id="hud"><span class="dot"></span><span id="hudLabel">CAM · AWAITING GESTURE</span></div>
+    <div class="counter" id="counter">01 / 06</div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+
+  </div><!-- end stage -->
+
+  <!-- hidden camera elements (off-screen) -->
+  <video id="cam" playsinline muted autoplay style="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none"></video>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js" crossorigin="anonymous"></script>
+<script src="ms.js"></script>
+</body>
+</html>

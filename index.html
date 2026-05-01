@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>Hello, WORLD! — 01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --canvas-w: 1728px;
+    --canvas-h: 1117px;
+    --ink: #000000;
+    --paper: #ffffff;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+    color: var(--ink);
+    font-family: "IBM Plex Mono", "Space Mono", monospace;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* Stage wrapper: letterbox the 1728x1117 canvas into any viewport. */
+  .stage {
+    position: fixed;
+    inset: 0;
+    background: #ffffff;
+    display: grid;
+    place-items: center;
+  }
+
+  .canvas {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: var(--canvas-w);
+    height: var(--canvas-h);
+    background: var(--paper);
+    transform-origin: center center;
+    overflow: hidden;
+  }
+
+  /* ───────── Hello, WORLD! ───────── */
+  .hero {
+    position: absolute;
+    left: 80px;
+    top: 80px;
+    right: 80px;
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 400;
+    font-size: 750px;
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    white-space: pre;
+    margin: 0;
+  }
+
+  /* ───────── 손으로 브이를 만드십시오. ───────── */
+  .directive {
+    position: absolute;
+    left: 80px;
+    bottom: 120px;
+    font-family: "Noto Sans KR", sans-serif;
+    font-weight: 400;
+    font-size: 82px;
+    line-height: 1.2;
+    color: var(--ink);
+    margin: 0;
+    white-space: nowrap;
+    letter-spacing: -0.02em;
+  }
+
+  /* ───────── tiny top-right HUD ───────── */
+  .hud {
+    position: absolute;
+    right: 80px;
+    top: 80px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 32px;
+    color: var(--ink);
+    text-align: right;
+    line-height: 1.35;
+    letter-spacing: 0.02em;
+    transition: color 300ms linear;
+  }
+  .hud.is-detected { color: #ff005f; }
+  .hud .dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: currentColor;
+    margin-right: 10px;
+    transform: translateY(-2px);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.15; }
+    50%      { opacity: 1; }
+  }
+
+  /* ───────── V-SIGN token inside the directive ───────── */
+  .v-token {
+    transition: color 220ms linear;
+  }
+  body.is-detected .v-token {
+    color: #ff005f;
+  }
+
+  /* Hidden camera + processing canvas — never visible to the user. */
+  #cam, #work {
+    position: fixed;
+    left: -9999px;
+    top: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* permission prompt overlay (only shown until camera is granted) */
+  .perm {
+    position: absolute;
+    right: 80px;
+    bottom: 120px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 26px;
+    color: #000;
+    letter-spacing: 0.04em;
+    opacity: 0.55;
+    text-align: right;
+    line-height: 1.4;
+    max-width: 520px;
+  }
+  .perm button {
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: 1.5px solid #000;
+    padding: 6px 14px;
+    margin-top: 10px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+  }
+  .perm.is-hidden { display: none; }
+</style>
+</head>
+<body data-chapter="intro">
+  <div class="stage">
+    <div class="canvas" data-screen-label="01 Hello World" id="canvas">
+      <h1 class="hero">Hello,
+WORLD!</h1>
+      <p class="directive">손으로 <span class="v-token">브이</span>를 만드십시오.</p>
+      <div class="hud" id="hud"><span class="dot"></span><span id="hudLabel">CAM_01 · AWAITING V-SIGN</span></div>
+      <div class="perm" id="perm">카메라 접근 권한이 필요합니다.<br><button id="permBtn">ENABLE CAMERA</button></div>
+    </div>
+  </div>
+  <video id="cam" playsinline muted autoplay></video>
+  <canvas id="work" width="320" height="240"></canvas>
+
+<!-- MediaPipe Hands (processed off-screen; nothing is drawn to the canvas) -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js" crossorigin="anonymous"></script>
+<script>
+  // ───── Letterbox the 1728×1117 canvas to viewport ─────
+  const canvasEl = document.getElementById('canvas');
+  const CW = 1728, CH = 1117;
+  function fit() {
+    const s = Math.max(window.innerWidth / CW, window.innerHeight / CH);
+    canvasEl.style.transform = `translate(-50%, -50%) scale(${s})`;
+  }
+  fit();
+  window.addEventListener('resize', fit);
+
+  // ───── Detection state ─────
+  const body = document.body;
+  const hud = document.getElementById('hud');
+  const hudLabel = document.getElementById('hudLabel');
+  const perm = document.getElementById('perm');
+  const permBtn = document.getElementById('permBtn');
+
+  let lastDetectedAt = 0;
+  const DETECT_HOLD_MS = 250; // keep "detected" state briefly to avoid flicker
+
+  function setDetected(on) {
+    body.classList.toggle('is-detected', on);
+    hud.classList.toggle('is-detected', on);
+    hudLabel.textContent = on ? 'CAM_01 · V-SIGN DETECTED' : 'CAM_01 · AWAITING V-SIGN';
+  }
+
+  // ───── V-sign classifier from 21 hand landmarks ─────
+  // MediaPipe Hands landmark indices:
+  // 0 wrist, 1..4 thumb, 5..8 index, 9..12 middle, 13..16 ring, 17..20 pinky.
+  // A V-sign = index + middle extended; ring + pinky folded.
+  function fingerExtended(lm, tip, pip, mcp) {
+    // extended when tip is further from wrist than PIP (along finger axis).
+    const wrist = lm[0];
+    const dTip = Math.hypot(lm[tip].x - wrist.x, lm[tip].y - wrist.y);
+    const dPip = Math.hypot(lm[pip].x - wrist.x, lm[pip].y - wrist.y);
+    const dMcp = Math.hypot(lm[mcp].x - wrist.x, lm[mcp].y - wrist.y);
+    return dTip > dPip && dPip > dMcp * 0.85;
+  }
+
+  function isVSign(lm) {
+    const index  = fingerExtended(lm, 8,  6,  5);
+    const middle = fingerExtended(lm, 12, 10, 9);
+    const ring   = fingerExtended(lm, 16, 14, 13);
+    const pinky  = fingerExtended(lm, 20, 18, 17);
+    if (!(index && middle)) return false;
+    if (ring || pinky) return false;
+    // index & middle tips should be separated (a "V", not stuck together).
+    const spread = Math.hypot(lm[8].x - lm[12].x, lm[8].y - lm[12].y);
+    const hand   = Math.hypot(lm[5].x - lm[17].x, lm[5].y - lm[17].y) || 1e-6;
+    return (spread / hand) > 0.35;
+  }
+
+  // ───── MediaPipe init ─────
+  const video = document.getElementById('cam');
+  let hands, camera;
+
+  let isRedirecting = false;
+  function onResults(results) {
+    if (isRedirecting) return;
+
+    let v = false;
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length) {
+      for (const lm of results.multiHandLandmarks) {
+        if (isVSign(lm)) { v = true; break; }
+      }
+    }
+    const now = performance.now();
+    if (v) {
+      lastDetectedAt = now;
+      isRedirecting = true;
+      setDetected(true);
+      setTimeout(() => {
+        window.location.href = "Microscopic_Sequence.html";
+      }, 500);
+      return;
+    }
+    setDetected(now - lastDetectedAt < DETECT_HOLD_MS);
+  }
+
+  async function startTracking() {
+    perm.classList.add('is-hidden');
+    try {
+      hands = new Hands({ locateFile: (f) =>
+        `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${f}`
+      });
+      hands.setOptions({
+        maxNumHands: 1,
+        modelComplexity: 0,
+        minDetectionConfidence: 0.6,
+        minTrackingConfidence: 0.5,
+      });
+      hands.onResults(onResults);
+
+      camera = new Camera(video, {
+        onFrame: async () => { await hands.send({ image: video }); },
+        width: 320,
+        height: 240,
+      });
+      await camera.start();
+    } catch (err) {
+      console.warn('Hand tracking failed:', err);
+      hudLabel.textContent = 'CAM_01 · UNAVAILABLE';
+      perm.classList.remove('is-hidden');
+      perm.innerHTML = '카메라를 열 수 없습니다.';
+    }
+  }
+
+  permBtn.addEventListener('click', startTracking);
+
+  // Try to start immediately — if the browser auto-allows, the prompt stays hidden.
+  // If it blocks, the permission button remains available.
+  (async () => {
+    try {
+      const status = await navigator.permissions?.query({ name: 'camera' }).catch(() => null);
+      if (status && status.state === 'granted') startTracking();
+    } catch (_) {}
+  })();
+</script>
+</body>
+</html>

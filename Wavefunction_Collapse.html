@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>파동함수 붕괴 · Wavefunction Collapse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ff-kr:   "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+    --ff-en:   "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --ff-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+    --ink: #000;
+    --hot: #ff2c7a;       /* hot magenta solid */
+    --cloud: #ffc6dd;     /* pink bubble fill */
+    --cloud-dk: #ff8fb8;  /* bubble overlap darker */
+    --paper: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; background: #fff; overflow: hidden; }
+  body { font-family: var(--ff-en); color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+  /* ───── letterbox + scale ───── */
+  .stage { position: fixed; inset: 0; background: #fff; overflow: hidden; }
+  .canvas {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 1920px; height: 1080px;
+    background: var(--paper);
+    overflow: hidden;
+  }
+
+  /* ───── pink probability cloud (shared bg across screens) ───── */
+  .cloud-layer, .particles-layer {
+    position: absolute; inset: 0;
+    pointer-events: none;
+  }
+  /* cloud sits ABOVE the screens so bubbles distort the text behind them */
+  .cloud-layer     { z-index: 6; }
+  .particles-layer { z-index: 7; pointer-events: none; }
+
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    /* glassy pink orb: refractive — use backdrop-filter to warp content behind,
+       plus a soft inner highlight + rim so it reads as a volumetric lens. */
+    background:
+      radial-gradient(circle at 32% 28%,
+        rgba(255,255,255,0.45) 0%,
+        rgba(255,255,255,0.10) 22%,
+        rgba(255,170,200,0.12) 55%,
+        rgba(255,90,150,0.22) 100%);
+    box-shadow:
+      inset 0 0 36px rgba(255,255,255,0.55),
+      inset -14px -22px 58px rgba(255,70,140,0.28),
+      inset 12px 16px 28px rgba(255,255,255,0.60),
+      0 10px 28px rgba(255,90,150,0.18);
+    -webkit-backdrop-filter: blur(10px) saturate(1.35) hue-rotate(-3deg);
+    backdrop-filter: blur(10px) saturate(1.35) hue-rotate(-3deg);
+    will-change: transform, opacity;
+    transition: opacity 600ms ease;
+  }
+  /* tiny bright specular highlight on each bubble, for extra glassiness */
+  .bubble::before {
+    content: "";
+    position: absolute;
+    top: 10%; left: 18%;
+    width: 28%; height: 22%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.95), rgba(255,255,255,0) 70%);
+    pointer-events: none;
+  }
+
+  .collapsed-dot {
+    position: absolute;
+    width: 64px; height: 64px;
+    margin-left: -32px; margin-top: -32px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 34% 30%,
+        #ffffff 0%,
+        #ff6aa8 35%,
+        #ff1466 75%,
+        #c8003f 100%);
+    box-shadow:
+      inset 0 0 20px rgba(255,255,255,0.6),
+      inset -6px -10px 22px rgba(140,0,50,0.5),
+      0 10px 32px rgba(255,44,122,0.35);
+    will-change: transform;
+  }
+
+  /* ───── screen container ───── */
+  .screen {
+    position: absolute; inset: 0;
+    z-index: 3;
+    padding: 72px 88px 120px 88px;
+    display: none;
+  }
+  .screen.is-active { display: block; }
+
+  /* ───── MAIN screen ───── */
+  .main { padding: 120px 80px 120px 80px; }
+  .main .title-kr {
+    font-family: var(--ff-kr);
+    font-weight: 400;
+    font-size: 500px;
+    line-height: 0.82;
+    letter-spacing: -0.05em;
+    color: var(--ink);
+    position: relative;
+    z-index: 1;
+    margin-left: -30px;
+    margin-top: -80px;
+    white-space: nowrap;
+  }
+  .main .title-en {
+    font-family: var(--ff-mono);
+    font-weight: 400;
+    font-size: 150px;
+    line-height: 0.85;
+    letter-spacing: -0.03em;
+    margin-top: 60px;
+    color: var(--ink);
+  }
+  .main .body-kr {
+    font-family: var(--ff-kr);
+    font-weight: 400;
+    font-size: 80px;
+    line-height: 1.5;
+    color: var(--ink);
+    margin-top: 100px;
+    max-width: 1700px;
+    position: relative;
+    z-index: 3;
+    letter-spacing: -0.01em;
+  }
+  .main .body-kr .em {
+    background: var(--hot);
+    color: var(--paper);
+    padding: 0 6px;
+  }
+
+  /* ───── STATS screen ───── */
+  .stats { padding: 120px 80px 120px 80px; }
+  .stats .stat-row {
+    display: grid;
+    grid-template-columns: 1fr minmax(450px, auto);
+    align-items: end;
+    gap: 30px;
+    margin-top: 0;
+  }
+  .stats .stat-label-kr {
+    font-family: var(--ff-kr);
+    font-weight: 400;
+    font-size: 220px;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .stats .stat-label-en {
+    font-family: var(--ff-mono);
+    font-weight: 400;
+    font-size: 120px;
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    margin-top: 10px;
+  }
+  .stats .stat-value {
+    font-family: var(--ff-mono);
+    font-weight: 400;
+    font-size: 400px;
+    line-height: 0.8;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    text-align: right;
+  }
+  .stats .stat-block { position: relative; z-index: 3; }
+  .stats .stat-block + .stat-block { margin-top: 80px; }
+
+  /* ───── DESCRIPTION screen ───── */
+  .desc { padding: 120px 80px 120px 80px; }
+  .desc .d-row {
+    font-family: var(--ff-kr);
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    position: relative;
+    z-index: 1;
+  }
+  .desc .d1 {
+    font-size: 600px;
+    margin-top: -80px;
+    margin-left: -30px;
+    white-space: nowrap;
+  }
+  .desc .d-en {
+    font-family: var(--ff-mono);
+    font-weight: 400;
+    font-size: 240px;
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    margin-top: 80px;
+    position: relative;
+    z-index: 1;
+    white-space: normal;
+    max-width: 1400px;
+  }
+  .desc .d3 {
+    font-size: 600px;
+    font-family: var(--ff-kr);
+    font-weight: 400;
+    margin-top: -50px;
+    text-align: right;
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.04em;
+  }
+  .desc .legend {
+    font-family: var(--ff-kr);
+    font-weight: 400;
+    font-size: 56px;
+    line-height: 1.5;
+    color: var(--ink);
+    position: absolute;
+    left: 80px;
+    bottom: 260px;
+    z-index: 3;
+    letter-spacing: -0.005em;
+  }
+
+  /* ───── mode bar (bottom) ───── */
+  .mode-bar {
+    position: absolute;
+    left: 80px; right: 80px; bottom: 30px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--ff-mono);
+    font-weight: 400;
+    font-size: 42px;
+    z-index: 5;
+    color: #c9c9c9;
+  }
+  .mode-bar .m {
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.2s ease;
+  }
+  .mode-bar .m:hover { color: #fff; }
+  .mode-bar .m.active {
+    color: var(--hot);
+    text-transform: uppercase;
+    font-size: 64px;
+    letter-spacing: 0.04em;
+    line-height: 1.05;
+  }
+  .mode-bar .m .label { display: block; }
+
+  .hud {
+    position: absolute; top: 25px; right: 80px;
+    font-family: var(--ff-mono); font-weight: 400; font-size: 26px;
+    z-index: 10; display: flex; align-items: center; gap: 14px;
+  }
+  .hud .dot { width: 12px; height: 12px; border-radius: 50%; background: #bbb; transition: background 180ms ease; }
+  .hud.is-detected .dot { background: var(--hot); box-shadow: 0 0 0 4px rgba(255,44,122,0.3); }
+
+  .page-counter {
+    position: absolute; top: 25px; left: 300px;
+    font-family: var(--ff-mono); font-weight: 400; font-size: 22px;
+    color: #888; z-index: 10;
+  }
+  .cam-btn {
+    position: absolute; top: 21px; left: 80px;
+    font-family: var(--ff-mono); font-size: 22px; padding: 12px 18px;
+    border: 1px solid #000; background: #fff; z-index: 20; cursor: pointer;
+  }
+  .cam-btn:hover { background: #000; color: #fff; }
+  .cam-btn.hidden { display: none; }
+
+  /* fade between screens */
+  .screen { opacity: 0; transition: opacity 350ms ease; }
+  .screen.is-active { opacity: 1; }
+
+  /* collapse burst ring */
+  @keyframes burst {
+    0%   { transform: scale(0.3); opacity: 0.9; }
+    100% { transform: scale(3.2); opacity: 0; }
+  }
+  .burst {
+    position: absolute;
+    width: 120px; height: 120px;
+    margin-left: -60px; margin-top: -60px;
+    border: 3px solid var(--hot);
+    border-radius: 50%;
+    animation: burst 700ms ease-out forwards;
+    pointer-events: none;
+  }
+
+  /* bubble collapse (fade to nothing) */
+  .bubble.collapsing {
+    transition: transform 900ms cubic-bezier(.3,.7,.2,1), opacity 900ms ease;
+    opacity: 0 !important;
+  }
+</style>
+</head>
+<body data-screen-label="Wavefunction Collapse · 1-finger mode">
+<div class="stage">
+  <div class="canvas" id="canvas">
+
+    <!-- shared probability cloud -->
+    <div class="cloud-layer" id="cloudLayer"></div>
+    <!-- collapsed (observed) particles layer -->
+    <div class="particles-layer" id="particlesLayer"></div>
+
+    <!-- MAIN -->
+    <section class="screen main is-active" data-screen="main" data-screen-label="01 Main">
+      <h1 class="title-kr">파동함수 붕괴</h1>
+      <div class="title-en">WAVEFUNCTION COLLAPSE</div>
+      <p class="body-kr">
+        관측 이전의 입자는 모든 곳에 확률의 파동<span class="em">으로</span> 존재한다.<br>
+        '관측'이라는 물리적 개입이 일어나는 순간,<br>
+        공간에 퍼져있던 파동은 단 하나의 점으로 수축된다.<br>
+        수많은 가능성이 지워지고 앙상한 현실만 남는 순간이다.
+      </p>
+    </section>
+
+    <!-- STATS -->
+    <section class="screen stats" data-screen="stats" data-screen-label="02 Stats">
+      <div class="stat-block">
+        <div class="stat-row">
+          <div>
+            <div class="stat-label-kr">총 관측 횟수</div>
+            <div class="stat-label-en">TOTAL--<br>OBSERVATIONS</div>
+          </div>
+          <div class="stat-value" id="statObs">0</div>
+        </div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-row">
+          <div>
+            <div class="stat-label-kr">평균 붕괴 소요 시간</div>
+            <div class="stat-label-en">AVG.--<br>COLLAPSE TIME</div>
+          </div>
+          <div class="stat-value" id="statAvg">--</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DESCRIPTION -->
+    <section class="screen desc" data-screen="desc" data-screen-label="03 Description">
+      <div class="d-row d1">파동함수—</div>
+      <div class="d-en">WAVEFUNCTION COLLAPSE</div>
+      <div class="d-row d3">붕괴</div>
+      <div class="legend">
+        설명_ 엄지 척<br>
+        관측_ 엄지와 검지로 꼬집기
+      </div>
+    </section>
+
+    <!-- top chrome -->
+    <div class="page-counter" id="pageCounter">01 / 03 · MAIN</div>
+    <div class="hud" id="hud"><span class="dot"></span><span id="hudLabel">CAM · AWAITING GESTURE</span></div>
+    <button class="cam-btn" id="camBtn">ENABLE CAMERA</button>
+
+    <!-- mode bar -->
+    <nav class="mode-bar">
+      <a href="Wavefunction_Collapse.html" class="m active"><span class="label">WAVEFUNCTION</span><span class="label">COLLAPSE</span></a>
+      <a href="Quantum_Entanglement.html" class="m"><span class="label">2finger</span></a>
+      <a href="Uncertainty_Principle.html" class="m"><span class="label">3finger</span></a>
+      <a href="Quantum_Tunneling.html" class="m"><span class="label">4finger</span></a>
+    </nav>
+
+  </div>
+</div>
+
+<video id="cam" playsinline muted autoplay style="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none"></video>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.js" crossorigin="anonymous"></script>
+<script src="wfc.js"></script>
+</body>
+</html>
