@@ -354,7 +354,7 @@
       if (isOpenPalm(results.multiHandLandmarks[0])) {
         if (openPalmStart === 0) openPalmStart = now;
         if (now - openPalmStart > PALM_HOLD_MS) {
-          window.location.href = "01_Hello_World.html";
+          window.location.href = "index.html";
           return;
         }
       } else {
@@ -441,7 +441,7 @@
       nextScreen();
     }
     if (e.code === 'Escape' || e.code === 'Backspace') {
-      window.location.href = "01_Hello_World.html";
+      window.location.href = "index.html";
     }
   });
 

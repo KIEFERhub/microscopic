@@ -48,32 +48,31 @@
   /* ───────── Hello, WORLD! ───────── */
   .hero {
     position: absolute;
-    left: 80px;
-    top: 80px;
-    right: 80px;
+    left: 40px;
+    top: 0;
     font-family: "IBM Plex Mono", monospace;
     font-weight: 400;
-    font-size: 750px;
-    line-height: 0.9;
-    letter-spacing: -0.01em;
+    font-size: 450px;
+    line-height: 450px;
+    letter-spacing: 0;
     color: var(--ink);
     white-space: pre;
     margin: 0;
   }
 
-  /* ───────── 손으로 브이를 만드십시오. ───────── */
+  /* ───────── 손으로 브이를 만드십시오. (Figma 61:599) ───────── */
   .directive {
     position: absolute;
-    left: 80px;
-    bottom: 120px;
+    left: 40px;
+    top: 939.31px;
     font-family: "Noto Sans KR", sans-serif;
     font-weight: 400;
-    font-size: 82px;
-    line-height: 1.2;
+    font-size: 93.459px;
+    line-height: normal;
     color: var(--ink);
     margin: 0;
     white-space: nowrap;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
   }
 
   /* ───────── tiny top-right HUD ───────── */
@@ -172,7 +171,7 @@ WORLD!</h1>
   const canvasEl = document.getElementById('canvas');
   const CW = 1728, CH = 1117;
   function fit() {
-    const s = Math.max(window.innerWidth / CW, window.innerHeight / CH);
+    const s = Math.min(window.innerWidth / CW, window.innerHeight / CH); // 화면 비율이 달라도 잘리지 않게 (여백은 흰색)
     canvasEl.style.transform = `translate(-50%, -50%) scale(${s})`;
   }
   fit();

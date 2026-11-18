@@ -3,7 +3,7 @@
   const canvasEl = document.getElementById('canvas');
   const CW = 1728, CH = 1117;
   function fit() {
-    const s = Math.max(window.innerWidth / CW, window.innerHeight / CH);
+    const s = Math.min(window.innerWidth / CW, window.innerHeight / CH); // 화면 비율이 달라도 잘리지 않게 (여백은 흰색)
     canvasEl.style.transform = `translate(-50%, -50%) scale(${s})`;
   }
   fit();

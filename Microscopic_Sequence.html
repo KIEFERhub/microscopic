@@ -31,9 +31,9 @@
   }
 
   /* ───────── Consistent typography variants ───────── */
-  .mix .ch.v-en { font-family: var(--ff-mono); font-weight: 400; }
+  .mix .ch.v-en { font-family: inherit; font-weight: 400; }
   .mix .ch.v-mono { font-family: var(--ff-mono); font-weight: 400; }
-  .mix .ch.v-kr { font-family: var(--ff-kr); font-weight: 400; }
+  .mix .ch.v-kr { font-family: inherit; font-weight: 400; }
 
   /* stroke-only (outlined) char */
   .mix .ch.v-stroke {
@@ -169,140 +169,65 @@
     }
   }
 
-  /* ───────── SLIDE 02 — MICRO / MACRO / SCOPIC ───────── */
-  .s02 .row {
-    position: absolute;
-    left: 80px;
-    display: flex;
-    align-items: center;
-    gap: 60px;
-  }
-  .s02 .r1 { top: 140px;  }
-  .s02 .r2 { top: 460px; }
-  .s02 .big {
-    font-family: var(--ff-mono);
-    font-weight: 400;
-    font-size: 360px;
-    line-height: 0.9;
-    color: #000;
-    letter-spacing: -0.06em;
-  }
-  .s02 .side {
-    font-family: var(--ff-kr);
-    font-weight: 400;
-    font-size: 80px;
-    line-height: 1.1;
-    white-space: nowrap;
-    color: #000;
-  }
-  .s02 .scopic {
-    position: absolute;
-    left: 80px;
-    top: 760px;
-    font-family: var(--ff-mono);
-    font-weight: 400;
-    font-size: 460px;
-    line-height: 0.8;
-    color: #000;
-    letter-spacing: -0.07em;
+  /* ─────────────────────────────────────────────────────────
+     Figma '기본 화면' 프레임(1728×1117) 좌표를 그대로 옮김.
+     .t = 절대배치 텍스트 블록 / .kr = Noto Sans KR / .en = IBM Plex Mono
+     ───────────────────────────────────────────────────────── */
+  .slide .t { position: absolute; margin: 0; white-space: nowrap; color: #000; font-weight: 400; letter-spacing: 0; }
+  .slide .kr { font-family: var(--ff-kr); }
+  .slide .en { font-family: var(--ff-mono); text-transform: uppercase; }
+  /* Noto Sans KR 공백이 시안 글꼴보다 넓어서 좁혀 Figma 폭에 맞춤 */
+  .slide .kr .ch { word-spacing: -0.04em; }
+
+  /* SLIDE 0 — MICRO / MACRO / SCOPIC  (Figma 61:601) */
+  .s02 .micro  { left: 41px; top: 0;     font-size: 262.413px; line-height: 389px; }
+  .s02 .macro  { left: 40px; top: 294px; font-size: 262.413px; line-height: 389px; }
+  .s02 .scopic { right: 47px; top: 559px; font-size: 400px; line-height: 592px; text-align: right; }
+  .s02 .side1  { left: 884px; top: 102px; font-size: 93.459px; line-height: 107px; }
+  .s02 .side2  { left: 884px; top: 404px; font-size: 93.459px; line-height: 107px; }
+
+  /* SLIDE 1 — 미시세계 오신 걸 환영합니다  (Figma 61:615) */
+  .s06 .kr-title { left: 40px;  top: 16px;  font-size: 447.789px; line-height: 515px; }
+  .s06 .entering { left: 40px;  top: 541px; font-size: 96.84px;  line-height: 104.269px; }
+  .s06 .welcome  { left: 673px; top: 497px; font-size: 210.184px; line-height: 302px; }
+
+  /* SLIDE 2 — 여기서 고전적 질서는 무너집니다  (Figma 61:625) */
+  .s05 .here-kr   { left: 40px;   top: 0;     font-size: 150px; line-height: 173px; }
+  .s05 .order-kr  { left: 40px;   top: 143px; font-size: 360px; line-height: 414px; }
+  .s05 .fall-kr   { left: 366px;  top: 944px; font-size: 150px; line-height: 173px; }
+  .s05 .here-en   { left: 486px;  top: 59px;  font-size: 90px;  line-height: 104.269px; }
+  .s05 .classic   { left: 1095px; top: 348px; font-size: 136.181px; line-height: 146.628px; }
+  .s05 .order-en  { left: 157px;  top: 595px; font-size: 136.181px; line-height: 146.628px; }
+  .s05 .fall-en   { left: 1137px; top: 995px; font-size: 90px;  line-height: 104.269px; }
+
+  /* SLIDE 3 — 형태는 확률로 흩어지고  (Figma 65:634) */
+  .s03 .prob-kr { left: 673px;  top: 347px; font-size: 367.606px; line-height: 423px; opacity: .3; filter: blur(15px); }
+  .s03 .kr1     { left: 40px;   top: 0;     font-size: 291.304px; line-height: 335px; }
+  .s03 .kr3     { left: 40px;   top: 782px; font-size: 291.304px; line-height: 335px; }
+  .s03 .en-forms   { left: 884px; top: 168px; font-size: 136.181px; line-height: 146.628px; }
+  .s03 .en-scatter { left: 49px;  top: 367px; font-size: 105.898px; line-height: 114.022px; }
+  .s03 .en-prob    { left: 1181px; top: 782px; font-size: 103.359px; line-height: 111.288px; color: rgba(0,0,0,.5); filter: blur(10px); }
+  /* 흐린 글자는 등장 애니메이션 후에도 흐림을 유지 */
+  .s03.is-active .prob-kr .ch, .s03.is-active .en-prob .ch { animation-name: gather-soft; }
+  @keyframes gather-soft {
+    0%   { opacity: 0; transform: translate(var(--tx,0px), var(--ty,0px)) rotate(var(--rot,0deg)) scale(1.25); }
+    100% { opacity: 1; transform: none; }
   }
 
-  /* ───────── SLIDE 03 — FORMS SCATTER ───────── */
-  .s03 .kr1 {
-    position: absolute; left: 80px; top: 140px;
-    font-family: var(--ff-kr); font-weight: 400; font-size: 380px; line-height: 0.85; color: #000;
-    letter-spacing: -0.05em;
-  }
-  .s03 .en-forms {
-    position: absolute; left: 1100px; top: 220px;
-    font-family: var(--ff-mono); font-weight: 400; font-size: 160px; color: #000; letter-spacing: -0.03em;
-  }
-  .s03 .en-scatter {
-    position: absolute; left: 80px; top: 460px;
-    font-family: var(--ff-mono); font-weight: 400; font-size: 130px; line-height: 1; color: #000; letter-spacing: -0.03em;
-    white-space: nowrap;
-  }
-  .s03 .kr2 {
-    position: absolute; left: 860px; top: 460px;
-    font-family: var(--ff-kr); font-weight: 400; font-size: 380px; line-height: 1; color: #8f8f8f;
-    filter: blur(8px); opacity: 0.55; letter-spacing: -0.05em;
-  }
-  .s03 .kr3 {
-    position: absolute; left: 80px; top: 760px;
-    font-family: var(--ff-kr); font-weight: 400; font-size: 400px; line-height: 0.8; color: #000;
-    letter-spacing: -0.06em;
-  }
-  .s03 .en-prob {
-    position: absolute; left: 1260px; top: 800px;
-    font-family: var(--ff-mono); font-weight: 400; font-size: 110px; line-height: 1; color: #b9b9b9; letter-spacing: -0.03em;
-    white-space: nowrap; filter: blur(3px);
-  }
+  /* SLIDE 4 — 정보는 [관측]에 의해 강제됩니다  (Figma 65:647) */
+  .s04 .body    { left: 40px;   top: 0;     font-size: 241.3px; line-height: 277px; }
+  .s04 .is      { left: 1155px; top: 114px; font-size: 90px; line-height: 104.269px; }
+  .s04 .info    { left: 302px;  top: 28px;  font-size: 90px; line-height: 104.269px; }
+  .s04 .forcibly{ left: 884px;  top: 582px; font-size: 90px; line-height: 104.269px; }
+  .s04 .byobs   { left: 302px;  top: 859px; font-size: 90px; line-height: 104.269px; }
 
-  /* ───────── SLIDE 04 — INFORMATION DETERMINED ───────── */
-  .s04 { color: #000; }
-  .s04 .stack {
-    position: absolute;
-    left: 50%; top: 55%;
-    transform: translate(-50%, -50%);
-    display: flex; flex-direction: column;
-    gap: 40px;
-    align-items: flex-start;
-    width: 100%;
-    padding: 0 80px;
-  }
-  .s04 .row {
-    display: flex; align-items: baseline; gap: 40px;
-    white-space: nowrap;
-    width: 100%;
-    justify-content: space-between;
-  }
-  .s04 .k-lg { font-family: var(--ff-kr); font-weight: 400; font-size: 320px; line-height: 0.85; letter-spacing: -0.06em; }
-  .s04 .e-sm {
-    font-family: var(--ff-mono); font-weight: 400;
-    font-size: 100px; line-height: 1; white-space: pre; letter-spacing: -0.02em;
-    transform: translateY(-20px);
-  }
-
-  /* ───────── SLIDE 05 ───────── */
-  .s05 .row {
-    position: absolute;
-    display: flex; align-items: baseline;
-    gap: 28px; white-space: nowrap;
-  }
-  .s05 .k-sm { font-family: var(--ff-kr); font-weight: 400; font-size: 90px;  line-height: 1; }
-  .s05 .k-lg { font-family: var(--ff-kr); font-weight: 400; font-size: 180px; line-height: 1; }
-  .s05 .e-sm {
-    font-family: var(--ff-mono); font-weight: 400;
-    font-size: 58px; line-height: 1; letter-spacing: -0.02em;
-    transform: translateY(-12px);
-  }
-  .s05 .e-md {
-    font-family: var(--ff-mono); font-weight: 400;
-    font-size: 88px; line-height: 1; letter-spacing: -0.03em;
-    transform: translateY(-20px);
-  }
-  .s05 .r-a { left: 80px;  top: 140px; }
-  .s05 .r-b { left: 80px;  top: 340px; }
-  .s05 .r-c { left: 300px; top: 580px; }
-  .s05 .r-d { left: 220px; top: 820px; }
-
-  /* ───────── SLIDE 06 — WELCOME ───────── */
-  .s06 .kr-title {
-    position: absolute; left: 80px; top: 140px;
-    font-family: var(--ff-kr); font-weight: 400; font-size: 460px; line-height: 0.82; color: #000;
-    letter-spacing: -0.06em;
-  }
-  .s06 .entering {
-    position: absolute; left: 80px; top: 560px;
-    font-family: var(--ff-mono); font-weight: 400; font-size: 130px; line-height: 1; color: #000; letter-spacing: -0.03em;
-    white-space: nowrap;
-  }
-  .s06 .welcome {
-    position: absolute; left: 960px; top: 580px;
-    font-family: var(--ff-kr); font-weight: 400; font-size: 260px; line-height: 0.9; color: #000;
-    letter-spacing: -0.05em;
-    white-space: nowrap;
-  }
+  /* SLIDE 5 — 4개의 물리적 개입이 대기 중입니다  (Figma 68:670) */
+  .s08 .l1 { left: 40px; top: 0;     font-size: 273.45px; line-height: 330px; }
+  .s08 .l2 { left: 40px; top: 330px; font-size: 273.45px; line-height: 330px; }
+  .s08 .l3 { left: 40px; top: 660px; font-size: 273.45px; line-height: 360px; }
+  .s08 .four  { left: 742px; top: 14px;  font-size: 136.181px; line-height: 146.628px; }
+  .s08 .inter { left: 534px; top: 587px; font-size: 136.181px; line-height: 146.628px; }
+  .s08 .stand { left: 40px;  top: 961px; font-size: 136.181px; line-height: 146.628px; }
 
   /* ───────── SLIDE 01 (intro) ───────── */
   .s01 .kr-huge {
@@ -346,32 +271,6 @@
     letter-spacing: -0.04em; text-align: center;
   }
 
-  /* ───────── SLIDE 08 — 4 INTERVENTIONS ───────── */
-  .s08 .kr1 {
-    position: absolute; left: 80px; top: 140px;
-    font-family: var(--ff-kr); font-weight: 400; font-size: 380px; line-height: 0.85; color: #000;
-    letter-spacing: -0.05em;
-  }
-  .s08 .en-forms {
-    position: absolute; left: 1040px; top: 220px;
-    font-family: var(--ff-mono); font-weight: 400; font-size: 160px; color: #000; letter-spacing: -0.03em;
-  }
-  .s08 .en-scatter {
-    position: absolute; left: 80px; top: 460px;
-    font-family: var(--ff-mono); font-weight: 400; font-size: 130px; line-height: 1; color: #000; letter-spacing: -0.03em;
-    white-space: nowrap;
-  }
-  .s08 .kr2 {
-    position: absolute; left: 820px; top: 460px;
-    font-family: var(--ff-kr); font-weight: 400; font-size: 380px; line-height: 1; color: #000;
-    opacity: 0.8; letter-spacing: -0.05em;
-  }
-  .s08 .kr3 {
-    position: absolute; left: 80px; top: 760px;
-    font-family: var(--ff-kr); font-weight: 400; font-size: 300px; line-height: 0.8; color: #000;
-    letter-spacing: -0.06em;
-    white-space: nowrap;
-  }
   .hud {
     position: absolute; top: 30px; right: 40px;
     font-family: var(--ff-mono); font-weight: 400; font-size: 26px;
@@ -401,101 +300,75 @@
   <div class="stage">
     <div class="canvas" id="canvas" data-screen-label="Sequence 02 → 06">
 
-      <!-- SLIDE 00 (Micro/Macro Selection) -->
+      <!-- SLIDE 00 (Micro/Macro Selection) — Figma 61:601 -->
       <section class="slide s02 mix" data-slide="0" data-screen-label="01 Micro Macro Scopic">
-        <div class="row r1">
-          <div class="big" data-scatter>MICRO</div>
-          <div class="side" data-scatter>미시세계_
+        <div class="t en micro" data-scatter>MICRO</div>
+        <div class="t en macro" data-scatter>MACRO</div>
+        <div class="t kr side1" data-scatter>미시세계_
 1을 만드십시오.</div>
-        </div>
-        <div class="row r2">
-          <div class="big" data-scatter>MACRO</div>
-          <div class="side" data-scatter>거시세계_
+        <div class="t kr side2" data-scatter>거시세계_
 2를 만드십시오.</div>
-        </div>
-        <div class="scopic" data-scatter>SCOPIC</div>
+        <div class="t en scopic" data-scatter>SCOPIC</div>
       </section>
 
-      <!-- SLIDE 01 (Welcome to Microscopic) -->
+      <!-- SLIDE 01 (Welcome to Microscopic) — Figma 61:615 -->
       <section class="slide s06 mix" data-slide="1" data-screen-label="02 Welcome to microscopic">
-        <div class="kr-title" data-scatter>미시세계</div>
-        <div class="entering" data-scatter>ENTERING--
+        <div class="t kr kr-title" data-scatter>미시세계</div>
+        <div class="t en entering" data-scatter>ENTERING--
 THE MICRO-
 SCOPIC</div>
-        <div class="welcome" data-scatter>오신 걸
+        <div class="t kr welcome" data-scatter>오신 걸
 환영합니다.</div>
       </section>
 
-      <!-- SLIDE 02 (Classic order collapses) -->
+      <!-- SLIDE 02 (Classic order collapses) — Figma 61:625 -->
       <section class="slide s05 mix" data-slide="2" data-screen-label="03 Classic order collapses">
-        <div class="row r-a">
-          <span class="k-sm" data-scatter>여기서</span>
-          <span class="e-sm" data-scatter>IN HERE,</span>
-        </div>
-        <div class="row r-b">
-          <span class="k-lg" data-scatter>고전적</span>
-          <span class="e-md" data-scatter>CLASSIC</span>
-        </div>
-        <div class="row r-c">
-          <span class="e-md" data-scatter>ORDER</span>
-          <span class="k-lg" data-scatter>질서는</span>
-        </div>
-        <div class="row r-d">
-          <span class="k-lg" data-scatter>무너집니다.</span>
-          <span class="e-md" data-scatter>COLLAPSES.</span>
-        </div>
+        <div class="t kr here-kr" data-scatter>여기서</div>
+        <div class="t en here-en" data-scatter>IN HERE,</div>
+        <div class="t kr order-kr" data-scatter>고전적
+       질서는</div>
+        <div class="t en classic" data-scatter>CLASSIC</div>
+        <div class="t en order-en" data-scatter>ORDER</div>
+        <div class="t kr fall-kr" data-scatter>무너집니다.</div>
+        <div class="t en fall-en" data-scatter>COLLAPSES.</div>
       </section>
 
-      <!-- SLIDE 03 (Forms scatter into probabilities) -->
+      <!-- SLIDE 03 (Forms scatter into probabilities) — Figma 65:634 -->
       <section class="slide s03 mix" data-slide="3" data-screen-label="04 Forms scatter into probabilities">
-        <div class="kr1" data-scatter>형태는</div>
-        <div class="en-forms" data-scatter>FORMS</div>
-        <div class="en-scatter" data-scatter>SCATTER--
+        <div class="t kr prob-kr" data-scatter data-nomix>확률로</div>
+        <div class="t kr kr1" data-scatter>형태는</div>
+        <div class="t en en-forms" data-scatter>FORMS</div>
+        <div class="t en en-scatter" data-scatter>SCATTER--
 INTO</div>
-        <div class="kr2" data-scatter data-nomix>확률로</div>
-        <div class="kr3" data-scatter>흩어지고,</div>
-        <div class="en-prob" data-scatter data-nomix>PROBAB-
+        <div class="t kr kr3" data-scatter>흩어지고,</div>
+        <div class="t en en-prob" data-scatter data-nomix>PROBAB-
 ILITIES,</div>
       </section>
 
-      <!-- SLIDE 04 (Information forcibly determined) -->
+      <!-- SLIDE 04 (Information forcibly determined) — Figma 65:647 -->
       <section class="slide s04 mix" data-slide="4" data-screen-label="05 Information forcibly determined">
-        <div class="stack">
-          <div class="row">
-            <span class="k-lg" data-scatter>정</span>
-            <span class="e-sm" data-scatter>INFOR-
-MATION</span>
-            <span class="k-lg" data-scatter>보</span>
-            <span class="e-sm" data-scatter>IS</span>
-            <span class="k-lg" data-scatter>는</span>
-          </div>
-          <div class="row">
-            <span class="k-lg" data-scatter>[관측]에 의</span>
-          </div>
-          <div class="row">
-            <span class="k-lg" data-scatter>해 강제</span>
-            <span class="e-sm" data-scatter>FORCIBLY--
-DETERMINED</span>
-            <span class="k-lg" data-scatter>됩</span>
-          </div>
-          <div class="row">
-            <span class="k-lg" data-scatter>니</span>
-            <span class="e-sm" data-scatter>BY--
-OBSERVATION.</span>
-            <span class="k-lg" data-scatter>다.</span>
-          </div>
-        </div>
+        <div class="t kr body" data-scatter>정          보       는
+   [관측]  에  의
+해  강제           됩
+니             다.</div>
+        <div class="t en info" data-scatter>INFOR-
+MATION</div>
+        <div class="t en is" data-scatter>IS</div>
+        <div class="t en forcibly" data-scatter>FORCIBLY--
+DETERMINED</div>
+        <div class="t en byobs" data-scatter>BY--
+OBSERVATION.</div>
       </section>
 
-      <!-- SLIDE 4.5 (4 Physical Interventions Stand By) -->
+      <!-- SLIDE 4.5 (4 Physical Interventions Stand By) — Figma 68:670 -->
       <section class="slide s08 mix" data-slide="5" data-screen-label="06 4 physical interventions">
-        <div class="kr1" data-scatter>4개의</div>
-        <div class="en-forms" data-scatter>FOUR--
+        <div class="t kr l1" data-scatter>4개의</div>
+        <div class="t kr l2" data-scatter>물리적 개입이</div>
+        <div class="t kr l3" data-scatter>대기 중입니다.</div>
+        <div class="t en four" data-scatter>FOUR--
 PHYSICAL</div>
-        <div class="en-scatter" data-scatter>INTERVENTIONS
-STAND BY.</div>
-        <div class="kr2" data-scatter data-nomix>물리적</div>
-        <div class="kr3" data-scatter>개입이 대기 중입니다.</div>
+        <div class="t en inter" data-scatter>INTERVENTIONS</div>
+        <div class="t en stand" data-scatter>STAND BY.</div>
       </section>
 
       <!-- SLIDE 05 (Intro - Outro/Restart) -->
