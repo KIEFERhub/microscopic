@@ -26,7 +26,7 @@
   .canvas {
     position: absolute;
     top: 50%; left: 50%;
-    width: 1920px; height: 1080px;
+    width: 1728px; height: 1117px;
     background: var(--paper);
     overflow: hidden;
   }
@@ -232,6 +232,54 @@
   .cam-btn:hover { background: #000; color: #fff; }
   .cam-btn.hidden { display: none; }
 </style>
+
+<style id="figma-layout">
+  :root { --fig-accent: #f8fe02; --big-left: 1095px; --big-top: 926px; --big-w: 593px; }
+  /* ═══ Figma '미시세계' 페이지 챕터 프레임(1728×1117) 좌표로 재배치 ═══ */
+  .canvas { width: 1728px !important; height: 1117px !important; }
+  .screen { padding: 0 !important; inset: 0; }
+  .screen .fx { position: absolute; margin: 0; white-space: nowrap; color: #000; font-weight: 400; letter-spacing: 0; }
+  .screen .fx.kr { font-family: var(--ff-kr); }
+  .screen .fx.en { font-family: var(--ff-mono); }
+  .screen .fx .ln { display: block; }
+  /* Noto Sans KR 공백 폭 보정 */
+  .screen .fx.kr { word-spacing: -0.04em; }
+
+  /* 설명(첫 화면) 안내문 */
+  .desc .f-legend { font-family: var(--ff-kr); font-size: 60.91px; line-height: 90px; }
+  .desc .f-en { font-size: 128.02px; line-height: 42.869px; }
+
+  /* 통계 화면 */
+  .stats .f-lab-kr { left: 40px; font-size: 163.714px; line-height: 458.398px; }
+  .stats .f-lab-en { left: 40px; font-size: 104.793px; line-height: 114.6px; }
+  .stats .f-val    { left: 1095px; font-size: 193.184px; line-height: 211.262px; font-family: var(--ff-mono); }
+
+  /* 상세 설명 화면 */
+  .main .f-title { font-size: 249.467px; line-height: 341.707px; top: 0; }
+  .main .f-sub   { left: 41px; top: 341.71px; font-size: 78.117px; line-height: 79px; }
+  .main .f-body  { left: 40px; top: 499.5px; font-size: 46.47px; line-height: 115px; }
+
+  /* 하단 손가락 메뉴: 382px 칸 4개, 40px 간격 */
+  .mode-bar { position: absolute !important; inset: 0 !important; display: block !important;
+              pointer-events: none; font-family: var(--ff-mono); z-index: 5; }
+  .mode-bar .m { position: absolute; top: 1027px; width: 382px; height: 90px;
+                 display: flex !important; flex-direction: column; justify-content: center; align-items: center;
+                 font-size: 48.02px !important; line-height: 42.869px !important; letter-spacing: 0 !important;
+                 text-transform: none !important; color: #000 !important; text-align: center; pointer-events: auto; }
+  .mode-bar .m:nth-child(1) { left: 40px; }
+  .mode-bar .m:nth-child(2) { left: 462px; }
+  .mode-bar .m:nth-child(3) { left: 884px; }
+  .mode-bar .m:nth-child(4) { left: 1306px; }
+  .mode-bar .m.active { color: var(--fig-accent) !important; }
+  /* 첫 화면에서는 현재 챕터 이름을 크게 */
+  .canvas:has(.screen.desc.is-active) .mode-bar .m.active {
+    font-size: 101.068px !important; line-height: 90.227px !important;
+    top: var(--big-top); left: var(--big-left); width: var(--big-w); height: 189.424px;
+  }
+  /* Figma: 터널링은 모든 화면에서 챕터 이름을 크게 */
+  .mode-bar .m.active { font-size: 101.068px !important; line-height: 90.227px !important;
+    top: var(--big-top); left: var(--big-left); width: var(--big-w); height: 189.424px; }
+</style>
 </head>
 <body>
 
@@ -258,59 +306,32 @@
       <a href="Quantum_Tunneling.html" class="m active"><span class="label">QUANTUM</span><span class="label">TUNNELING</span></a>
     </nav>
 
-    <!-- 02/03 STATS -->
-    <section class="screen stats" data-screen="stats">
-      <div class="stat-block">
-        <div class="stat-row">
-          <div class="stat-label">
-            <div class="stat-label-kr">장벽 충돌 횟수</div>
-            <div class="stat-label-en">BARRIER COLLISIONS</div>
-          </div>
-          <div class="stat-value" id="statV1">23</div>
-        </div>
-      </div>
-      <div class="stat-block">
-        <div class="stat-row">
-          <div class="stat-label">
-            <div class="stat-label-kr">터널링 돌파 횟수</div>
-            <div class="stat-label-en">SUCCESSFUL TUNNELS</div>
-          </div>
-          <div class="stat-value" id="statV2">27</div>
-        </div>
-      </div>
-      <div class="stat-block">
-        <div class="stat-row">
-          <div class="stat-label">
-            <div class="stat-label-kr">터널링 확률</div>
-            <div class="stat-label-en">TUNNELING PROBABILITY</div>
-          </div>
-          <div class="stat-value" id="statIndex">59.6%</div>
-        </div>
-      </div>
+    <!-- 01 MAIN (Figma 55:463) -->
+    <section class="screen desc is-active" data-screen="desc" data-screen-label="01 Main">
+      <p class="fx kr" style="left:40px; top:-5px; font-size:400px; line-height:560px; letter-spacing:44px"><span class="ln">양자--</span><span class="ln">터널링</span></p>
+      <p class="fx en f-en" style="left:40px; width:1648px; top:528.57px; text-align:center">QUANTUM TUNNELING</p>
+      <p class="fx f-legend" style="left:883px; top:33px"><span class="ln">설명_ 엄지 척</span><span class="ln">장벽_ 엄지와 검지로 꼬집기</span></p>
+    </section>
+    <!-- 02 STATS (Figma 61:498) -->
+    <section class="screen stats" data-screen="stats" data-screen-label="02 Stats">
+      <p class="fx kr" style="left:40px; top:68.2px; font-size:128.031px; line-height:148px">장벽 충돌 횟수</p>
+      <p class="fx en" style="left:40px; top:210.29px; font-size:81.955px; line-height:89.624px">BARRIER COLLISIONS</p>
+      <p class="fx kr" style="left:40px; top:387px; font-size:128.031px; line-height:148px">터널링 돌파 횟수</p>
+      <p class="fx en" style="left:40px; top:529.1px; font-size:81.955px; line-height:89.624px">SUCCESSFUL TUNNELS</p>
+      <p class="fx kr" style="left:40px; top:706px; font-size:128.031px; line-height:148px">터널링 확률</p>
+      <p class="fx en" style="left:40px; top:848.1px; font-size:81.955px; line-height:89.624px">TUNNELING PROBABILITY</p>
+      <p class="fx f-val" id="statV1" style="left:1095px; top:84px; font-size:182.249px; line-height:199.303px">0</p>
+      <p class="fx f-val" id="statV2" style="left:1098px; top:405px; font-size:182.249px; line-height:199.303px">0</p>
+      <p class="fx f-val" id="statIndex" style="left:1098px; top:726px; font-size:182.249px; line-height:199.303px">0%</p>
+    </section>
+    <section class="screen main" data-screen="main" data-screen-label="03 Description">
+      <h1 class="fx kr f-title" style="left:41px">양자 터널링</h1>
+      <p class="fx en f-sub">Quantum Tunneling</p>
+      <p class="fx kr f-body"><span class="ln">고전 물리학에서는 공이 벽을 넘으려면 벽보다 높은 에너지가 필요하다.</span><span class="ln">하지만 양자 세계의 입자는 확률의 파동이므로,</span><span class="ln">튕겨 나오는 대신 아주 낮은 확률로 거대한 에너지 장벽을 그대로 투과해</span><span class="ln">반대편에 나타나는 마술 같은 현상을 일으킵니다.</span></p>
     </section>
 
-    <!-- 03/03 DESCRIPTION (Detailed) -->
-    <section class="screen main" data-screen="main">
-      <h1 class="title-kr">양자 터널링</h1>
-      <div class="title-en">Quantum Tunneling</div>
-      <p class="body-kr">
-        고전 물리학에서는 공이 벽을 넘으려면 벽보다 높은 에너지가 필요하다.<br>
-        하지만 양자 세계의 입자는 확률의 파동이므로,<br>
-        튕겨 나오는 대신 아주 낮은 확률로 거대한 에너지 장벽을 그대로 투과해<br>
-        반대편에 나타나는 마술 같은 현상을 일으킵니다.
-      </p>
-    </section>
 
-    <!-- 01/03 MAIN (Artistic) -->
-    <section class="screen desc is-active" data-screen="desc">
-      <div class="d-row d1">양자—</div>
-      <div class="d-en">QUANTUM TUNNELING</div>
-      <div class="d-row d3">터널링</div>
-      <div class="legend">
-        설명_ 엄지 척<br>
-        장벽_ 엄지와 검지로 꼬집기
-      </div>
-    </section>
+
 
   </div>
 </div>

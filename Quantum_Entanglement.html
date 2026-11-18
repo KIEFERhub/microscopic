@@ -26,7 +26,7 @@
   .canvas {
     position: absolute;
     top: 50%; left: 50%;
-    width: 1920px; height: 1080px;
+    width: 1728px; height: 1117px;
     background: var(--paper);
     overflow: hidden;
   }
@@ -329,6 +329,51 @@
   }
 
 </style>
+
+<style id="figma-layout">
+  :root { --fig-accent: #007afd; --big-left: 251px; --big-top: 928px; --big-w: 804px; }
+  /* ═══ Figma '미시세계' 페이지 챕터 프레임(1728×1117) 좌표로 재배치 ═══ */
+  .canvas { width: 1728px !important; height: 1117px !important; }
+  .screen { padding: 0 !important; inset: 0; }
+  .screen .fx { position: absolute; margin: 0; white-space: nowrap; color: #000; font-weight: 400; letter-spacing: 0; }
+  .screen .fx.kr { font-family: var(--ff-kr); }
+  .screen .fx.en { font-family: var(--ff-mono); }
+  .screen .fx .ln { display: block; }
+  /* Noto Sans KR 공백 폭 보정 */
+  .screen .fx.kr { word-spacing: -0.04em; }
+
+  /* 설명(첫 화면) 안내문 */
+  .desc .f-legend { font-family: var(--ff-kr); font-size: 60.91px; line-height: 90px; }
+  .desc .f-en { font-size: 128.02px; line-height: 42.869px; }
+
+  /* 통계 화면 */
+  .stats .f-lab-kr { left: 40px; font-size: 163.714px; line-height: 458.398px; }
+  .stats .f-lab-en { left: 40px; font-size: 104.793px; line-height: 114.6px; }
+  .stats .f-val    { left: 1095px; font-size: 193.184px; line-height: 211.262px; font-family: var(--ff-mono); }
+
+  /* 상세 설명 화면 */
+  .main .f-title { font-size: 249.467px; line-height: 341.707px; top: 0; }
+  .main .f-sub   { left: 41px; top: 341.71px; font-size: 78.117px; line-height: 79px; }
+  .main .f-body  { left: 40px; top: 499.5px; font-size: 46.47px; line-height: 115px; }
+
+  /* 하단 손가락 메뉴: 382px 칸 4개, 40px 간격 */
+  .mode-bar { position: absolute !important; inset: 0 !important; display: block !important;
+              pointer-events: none; font-family: var(--ff-mono); z-index: 5; }
+  .mode-bar .m { position: absolute; top: 1027px; width: 382px; height: 90px;
+                 display: flex !important; flex-direction: column; justify-content: center; align-items: center;
+                 font-size: 48.02px !important; line-height: 42.869px !important; letter-spacing: 0 !important;
+                 text-transform: none !important; color: #000 !important; text-align: center; pointer-events: auto; }
+  .mode-bar .m:nth-child(1) { left: 40px; }
+  .mode-bar .m:nth-child(2) { left: 462px; }
+  .mode-bar .m:nth-child(3) { left: 884px; }
+  .mode-bar .m:nth-child(4) { left: 1306px; }
+  .mode-bar .m.active { color: var(--fig-accent) !important; }
+  /* 첫 화면에서는 현재 챕터 이름을 크게 */
+  .canvas:has(.screen.desc.is-active) .mode-bar .m.active {
+    font-size: 101.068px !important; line-height: 90.227px !important;
+    top: var(--big-top); left: var(--big-left); width: var(--big-w); height: 189.424px;
+  }
+</style>
 </head>
 <body data-screen-label="Quantum Entanglement · 2-finger mode">
 <div class="stage">
@@ -340,50 +385,29 @@
     <!-- entangled pairs visual layer -->
     <div class="pairs-layer" id="pairsLayer"></div>
 
-    <!-- DETAILED AS DESCRIPTION -->
-    <section class="screen main" data-screen="main" data-screen-label="03 Description">
-      <h1 class="title-kr">양자 얽힘</h1>
-      <div class="title-en">QUANTUM ENTANGLEMENT</div>
-      <p class="body-kr">
-        두 입자가 한 번 얽히면, 아무리 멀리 떨어져 있어도<br>
-        하나를 관측하는 순간 다른 하나의 <span class="em">상태가 결정</span>된다.<br>
-        공간을 무시하는 이 '유령 같은 원격 작용'은<br>
-        양자역학에서 가장 기이하고 아름다운 현상이다.
-      </p>
-    </section>
-
-    <!-- STATS -->
-    <section class="screen stats" data-screen="stats" data-screen-label="02 Stats">
-      <div class="stat-block">
-        <div class="stat-row">
-          <div>
-            <div class="stat-label-kr">총 얽힘 생성</div>
-            <div class="stat-label-en">TOTAL--<br>ENTANGLEMENTS</div>
-          </div>
-          <div class="stat-value" id="statEnt">0</div>
-        </div>
-      </div>
-      <div class="stat-block">
-        <div class="stat-row">
-          <div>
-            <div class="stat-label-kr">평균 상관 거리</div>
-            <div class="stat-label-en">AVG.--<br>CORRELATION DIST.</div>
-          </div>
-          <div class="stat-value" id="statDist">--</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ARTISTIC AS MAIN -->
+    <!-- 01 MAIN (Figma 55:157) -->
     <section class="screen desc is-active" data-screen="desc" data-screen-label="01 Main">
-      <div class="d-row d1">양자—</div>
-      <div class="d-en">QUANTUM<br>ENTANGLEMENT</div>
-      <div class="d-row d3">얽힘</div>
-      <div class="legend">
-        설명_ 엄지 척<br>
-        얽힘 생성_ 엄지와 검지로 꼬집기
-      </div>
+      <p class="fx kr" style="left:40px; width:1648px; top:-5px; font-size:408.834px; line-height:560px; text-align:center; letter-spacing:44.97px; text-indent:44.97px">양자얽힘</p>
+      <p class="fx en f-en" style="left:40px; width:1648px; top:571.57px; text-align:center">QUANTUM ENTANGLEMENT</p>
+      <p class="fx f-legend" style="left:883px; top:709px"><span class="ln">설명_ 엄지 척</span><span class="ln">관측_ 엄지와 검지로 꼬집기</span></p>
     </section>
+    <section class="screen stats" data-screen="stats" data-screen-label="02 Stats">
+      <p class="fx kr f-lab-kr" style="top:-119px">동시성 동기화 횟수</p>
+      <p class="fx en f-lab-en" style="top:202.7px"><span class="ln">SYNCHRONIZED--</span><span class="ln">EVENTS</span></p>
+      <p class="fx f-val" id="statEnt" style="top:194px">0</p>
+      <p class="fx kr f-lab-kr" style="top:422.22px">최대 작용 거리</p>
+      <p class="fx en f-lab-en" style="top:743.91px"><span class="ln">MAX ACTION--</span><span class="ln">DISTANCE</span></p>
+      <p class="fx f-val" id="statDist" style="top:744px">--</p>
+    </section>
+
+    <section class="screen main" data-screen="main" data-screen-label="03 Description">
+      <h1 class="fx kr f-title" style="left:41px">양자 얽힘</h1>
+      <p class="fx en f-sub">QUANTUM ENTANGLEMENT</p>
+      <p class="fx kr f-body"><span class="ln">물리적 거리는 무의미하다.</span><span class="ln">얽혀있는 두 입자는 시공간의 한계를 무시하고 즉각적으로 상태를 동기화한다.</span><span class="ln">한쪽의 상태가 확정되면, 빛의 속도보다 빠르게 반대쪽 상태도 그 즉시 결정된다.</span><span class="ln">중간 과정을 거치는 신호 이동은 없다.</span></p>
+    </section>
+
+
+
 
     <!-- top chrome -->
     <div class="page-counter" id="pageCounter">01 / 03 · MAIN</div>

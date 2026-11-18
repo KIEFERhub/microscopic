@@ -2,13 +2,13 @@
 // Shared probability cloud + pinch-to-observe + 👍 to cycle screens.
 
 (() => {
-  const CANVAS_W = 1920, CANVAS_H = 1080;
+  const CANVAS_W = 1728, CANVAS_H = 1117; // Figma 프레임 크기
 
   // ───── letterbox scale ─────
   const canvas = document.getElementById('canvas');
   function fit() {
     const vw = window.innerWidth, vh = window.innerHeight;
-    const s = Math.max(vw / CANVAS_W, vh / CANVAS_H);
+    const s = Math.min(vw / CANVAS_W, vh / CANVAS_H); // 잘리지 않게
     canvas.style.transform = `translate(-50%, -50%) scale(${s})`;
   }
   window.addEventListener('resize', fit);

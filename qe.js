@@ -1,11 +1,11 @@
 (function() {
   // ───── letterbox scaling ─────
   const canvasEl = document.getElementById('canvas');
-  const CW = 1920, CH = 1080;
+  const CW = 1728, CH = 1117; // Figma 프레임 크기
   function fit() {
     const sx = window.innerWidth / CW;
     const sy = window.innerHeight / CH;
-    const s = Math.max(sx, sy);
+    const s = Math.min(sx, sy); // 잘리지 않게
     canvasEl.style.transform = `translate(-50%, -50%) scale(${s})`;
   }
   fit();
@@ -42,6 +42,7 @@
   const pairsLayer = document.getElementById('pairsLayer');
   let totalEntanglements = 0;
   let totalDist = 0;
+  let maxDist = 0;
   const statEntEl = document.getElementById('statEnt');
   const statDistEl = document.getElementById('statDist');
 
@@ -139,8 +140,9 @@
     
     totalEntanglements++;
     totalDist += (sumDist / targetMols.length);
+    maxDist = Math.max(maxDist, sumDist / targetMols.length);
     statEntEl.textContent = totalEntanglements;
-    statDistEl.textContent = Math.round(totalDist / totalEntanglements) + 'px';
+    statDistEl.textContent = Math.round(maxDist) + 'px';
     
     activeEntanglements.push({
       group,
@@ -199,7 +201,7 @@
 
   // ───── keyboard ─────
   document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextScreen(); }
+    // 화면 넘김(Space/→)은 아래 keydown 핸들러 하나에서만 처리 (두 번 넘어가던 문제 수정)
     if (e.key === 'ArrowLeft') { e.preventDefault(); showScreen(screenIdx - 1); }
     if (e.key === 'e' || e.key === 'E') {
       startEntanglement(300 + Math.random() * 1100, 200 + Math.random() * 600);
