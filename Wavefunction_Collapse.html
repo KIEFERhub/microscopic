@@ -311,48 +311,67 @@
 </style>
 
 <style id="figma-layout">
-  :root { --fig-accent: #ff005f; --big-left: 40px; --big-top: 927.58px; --big-w: 804px; }
-  /* ═══ Figma '미시세계' 페이지 챕터 프레임(1728×1117) 좌표로 재배치 ═══ */
-  .canvas { width: 1728px !important; height: 1117px !important; }
-  .screen { padding: 0 !important; inset: 0; }
-  .screen .fx { position: absolute; margin: 0; white-space: nowrap; color: #000; font-weight: 400; letter-spacing: 0; }
-  .screen .fx.kr { font-family: var(--ff-kr); }
-  .screen .fx.en { font-family: var(--ff-mono); }
-  .screen .fx .ln { display: block; }
-  /* Noto Sans KR 공백 폭 보정 */
-  .screen .fx.kr { word-spacing: -0.04em; }
+  :root { --fig-accent: #ff005f; }
+  /* ═══ 공통 레이아웃: 위아래 여백 통일 ═══
+     캔버스 폭 1728 고정, 높이는 창 비율에 맞춰 늘어남(JS) → 위아래 빈 띠 없음
+     상단 UI 24px / 본문 84px부터 / 하단 메뉴 40px 위 / 본문은 하단 160px 앞까지 */
+  .canvas { width: 1728px !important; }
+  .page-counter { top: 24px !important; left: 260px !important; font-size: 20px !important; line-height: 1 !important; }
+  .hud { top: 22px !important; right: 40px !important; font-size: 22px !important; line-height: 1 !important; }
+  .cam-btn { top: 14px !important; left: 40px !important; font-size: 18px !important; padding: 8px 14px !important; }
 
-  /* 설명(첫 화면) 안내문 */
-  .desc .f-legend { font-family: var(--ff-kr); font-size: 60.91px; line-height: 90px; }
-  .desc .f-en { font-size: 128.02px; line-height: 42.869px; }
+  .screen { position: absolute; inset: 0; box-sizing: border-box;
+            padding: 84px 40px 160px !important;
+            flex-direction: column; justify-content: space-between; }
+  .screen.is-active { display: flex !important; }
+  .screen:not(.is-active) { display: none !important; }
+  .screen p, .screen h1 { margin: 0; font-weight: 400; color: #000; letter-spacing: 0; }
+  .screen .k { font-family: var(--ff-kr); line-height: 0.92; white-space: nowrap; word-spacing: -0.04em; }
+  .screen .e { font-family: var(--ff-mono); line-height: 1; white-space: nowrap; }
+  .screen .ln { display: block; }
+  .screen .row { display: flex; justify-content: space-between; align-items: flex-end; }
+  .screen .row.top { align-items: flex-start; }
+  .screen .col { display: flex; flex-direction: column; gap: 28px; }
+  .screen .col.end { align-items: flex-end; text-align: right; }
+  .screen .center { text-align: center; }
+  .screen .right  { text-align: right; }
+
+  /* 첫 화면 */
+  .desc .d-big { font-size: 360px; }
+  .desc .d-mid { font-size: 112px; }
+  .desc .legend2 { font-family: var(--ff-kr); font-size: 56px; line-height: 1.45; white-space: nowrap; }
+  .desc .chapter { font-family: var(--ff-mono); font-size: 96px; line-height: 0.95; color: var(--fig-accent); white-space: nowrap; }
 
   /* 통계 화면 */
-  .stats .f-lab-kr { left: 40px; font-size: 163.714px; line-height: 458.398px; }
-  .stats .f-lab-en { left: 40px; font-size: 104.793px; line-height: 114.6px; }
-  .stats .f-val    { left: 1095px; font-size: 193.184px; line-height: 211.262px; font-family: var(--ff-mono); }
+  .stats .stat { display: flex; flex-direction: column; gap: 20px; }
+  .stats .s-kr  { font-size: 150px; }
+  .stats .s-row { display: grid; grid-template-columns: 1055px 1fr; align-items: end; }
+  .stats .s-en  { font-size: 96px; line-height: 1.1; }
+  .stats .s-val { font-family: var(--ff-mono); font-size: 180px; line-height: 0.9; white-space: nowrap; }
+  .stats .s-val.sm { font-size: 96px; line-height: 1.1; }
+  .stats .stat3 { display: grid; grid-template-columns: 1055px 1fr; align-items: center; }
+  .stats .stat3 .s-kr { font-size: 120px; }
+  .stats .stat3 .s-en { font-size: 76px; margin-top: 16px; }
+  .stats .stat3 .s-val { font-size: 170px; }
 
-  /* 상세 설명 화면 */
-  .main .f-title { font-size: 249.467px; line-height: 341.707px; top: 0; }
-  .main .f-sub   { left: 41px; top: 341.71px; font-size: 78.117px; line-height: 79px; }
-  .main .f-body  { left: 40px; top: 499.5px; font-size: 46.47px; line-height: 115px; }
+  /* 설명 화면 */
+  .main { justify-content: flex-start !important; }
+  .main .m-title { font-size: 220px; }
+  .main .m-sub   { font-size: 72px; margin-top: 28px; }
+  .main .m-body  { font-family: var(--ff-kr); font-size: 44px; line-height: 2.2; margin: auto 0; white-space: nowrap; }
 
-  /* 하단 손가락 메뉴: 382px 칸 4개, 40px 간격 */
+  /* 하단 손가락 메뉴: 382px 4칸, 하단 40px에 맞춤 */
   .mode-bar { position: absolute !important; inset: 0 !important; display: block !important;
               pointer-events: none; font-family: var(--ff-mono); z-index: 5; }
-  .mode-bar .m { position: absolute; top: 1027px; width: 382px; height: 90px;
-                 display: flex !important; flex-direction: column; justify-content: center; align-items: center;
-                 font-size: 48.02px !important; line-height: 42.869px !important; letter-spacing: 0 !important;
+  .mode-bar .m { position: absolute; top: auto !important; bottom: 40px; width: 382px; height: auto !important;
+                 display: flex !important; flex-direction: column; justify-content: flex-end; align-items: center;
+                 font-size: 44px !important; line-height: 1 !important; letter-spacing: 0 !important;
                  text-transform: none !important; color: #000 !important; text-align: center; pointer-events: auto; }
   .mode-bar .m:nth-child(1) { left: 40px; }
   .mode-bar .m:nth-child(2) { left: 462px; }
   .mode-bar .m:nth-child(3) { left: 884px; }
   .mode-bar .m:nth-child(4) { left: 1306px; }
   .mode-bar .m.active { color: var(--fig-accent) !important; }
-  /* 첫 화면에서는 현재 챕터 이름을 크게 */
-  .canvas:has(.screen.desc.is-active) .mode-bar .m.active {
-    font-size: 101.068px !important; line-height: 90.227px !important;
-    top: var(--big-top); left: var(--big-left); width: var(--big-w); height: 189.424px;
-  }
 </style>
 </head>
 <body data-screen-label="Wavefunction Collapse · 1-finger mode">
@@ -364,26 +383,31 @@
     <!-- collapsed (observed) particles layer -->
     <div class="particles-layer" id="particlesLayer"></div>
 
-    <!-- 01 MAIN (Figma 55:66) -->
     <section class="screen desc is-active" data-screen="desc" data-screen-label="01 Main">
-      <p class="fx kr" style="right:40px; top:-43px; font-size:408.834px; line-height:560px; text-align:right"><span class="ln">파동함수-</span><span class="ln">붕괴</span></p>
-      <p class="fx en f-en" style="left:40px; top:504px">WAVEFUNCTION COLLAPSE</p>
-      <p class="fx f-legend" style="left:41px; top:688px"><span class="ln">설명_ 엄지 척</span><span class="ln">관측_ 엄지와 검지로 꼬집기</span></p>
+      <p class="k d-big right">파동함수-</p>
+      <p class="e d-mid">WAVEFUNCTION COLLAPSE</p>
+      <div class="row">
+        <div class="col"><p class="legend2"><span class="ln">설명_ 엄지 척</span><span class="ln">관측_ 엄지와 검지로 꼬집기</span></p><p class="chapter"><span class="ln">WAVEFUNCTION</span><span class="ln">COLLAPSE</span></p></div>
+        <p class="k d-big">붕괴</p>
+      </div>
     </section>
     <section class="screen stats" data-screen="stats" data-screen-label="02 Stats">
-      <p class="fx kr f-lab-kr" style="top:-119px">총 관측 횟수</p>
-      <p class="fx en f-lab-en" style="top:202.7px"><span class="ln">TOTAL--</span><span class="ln">OBSERVATIONS</span></p>
-      <p class="fx f-val" id="statObs" style="top:212px">0</p>
-      <p class="fx kr f-lab-kr" style="top:422.22px">평균 붕괴 소요 시간</p>
-      <p class="fx en f-lab-en" style="top:743.91px"><span class="ln">AVG.--</span><span class="ln">COLLAPSE TIME</span></p>
-      <p class="fx f-val" id="statAvg" style="top:762px">--</p>
+      <div class="stat">
+        <p class="k s-kr">총 관측 횟수</p>
+        <div class="s-row"><p class="e s-en"><span class="ln">TOTAL--</span><span class="ln">OBSERVATIONS</span></p><p class="s-val" id="statObs">0</p></div>
+      </div>
+      <div class="stat">
+        <p class="k s-kr">평균 붕괴 소요 시간</p>
+        <div class="s-row"><p class="e s-en"><span class="ln">AVG.--</span><span class="ln">COLLAPSE TIME</span></p><p class="s-val" id="statAvg">--</p></div>
+      </div>
+    </section>
+    <section class="screen main" data-screen="main" data-screen-label="03 Description">
+      <h1 class="k m-title ">파동함수 붕괴</h1>
+      <p class="e m-sub ">WAVEFUNCTION COLLAPSE</p>
+      <p class="m-body"><span class="ln">관측 이전의 입자는 모든 곳에 확률의 파동으로 존재한다.</span><span class="ln">'관측'이라는 물리적 개입이 일어나는 순간,</span><span class="ln">공간에 퍼져있던 파동은 단 하나의 점으로 수축된다.</span><span class="ln">수많은 가능성이 지워지고 앙상한 현실만 남는 순간이다.</span></p>
     </section>
 
-    <section class="screen main" data-screen="main" data-screen-label="03 Description">
-      <h1 class="fx kr f-title" style="right:250px; text-align:right">파동함수 붕괴</h1>
-      <p class="fx en f-sub">WAVEFUNCTION COLLAPSE</p>
-      <p class="fx kr f-body"><span class="ln">관측 이전의 입자는 모든 곳에 확률의 파동으로 존재한다.</span><span class="ln">'관측'이라는 물리적 개입이 일어나는 순간,</span><span class="ln">공간에 퍼져있던 파동은 단 하나의 점으로 수축된다.</span><span class="ln">수많은 가능성이 지워지고 앙상한 현실만 남는 순간이다.</span></p>
-    </section>
+
 
 
 

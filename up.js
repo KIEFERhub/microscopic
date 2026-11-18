@@ -1,11 +1,14 @@
 (function() {
-  const CANVAS_W = 1728, CANVAS_H = 1117; // Figma 프레임 크기
+  const CANVAS_W = 1728; let CANVAS_H = 1117; // 높이는 창 비율에 맞춰 fit()에서 갱신
 
   // ───── letterbox scale ─────
   const canvas = document.getElementById('canvas');
   function fit() {
     const vw = window.innerWidth, vh = window.innerHeight;
-    const s = Math.min(vw / CANVAS_W, vh / CANVAS_H); // 잘리지 않게
+    const s = Math.min(vw / 1728, vh / 1117); // 잘리지 않게
+    // 창이 세로로 더 길면 캔버스 높이를 늘려 위아래 빈 띠를 없앰
+    CANVAS_H = Math.max(1117, vh / s);
+    canvas.style.height = CANVAS_H + 'px';
     canvas.style.transform = `translate(-50%, -50%) scale(${s})`;
   }
   window.addEventListener('resize', fit);

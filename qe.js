@@ -6,6 +6,7 @@
     const sx = window.innerWidth / CW;
     const sy = window.innerHeight / CH;
     const s = Math.min(sx, sy); // 잘리지 않게
+    canvasEl.style.height = Math.max(CH, window.innerHeight / s) + 'px'; // 위아래 빈 띠 없앰
     canvasEl.style.transform = `translate(-50%, -50%) scale(${s})`;
   }
   fit();
