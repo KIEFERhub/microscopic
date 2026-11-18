@@ -295,6 +295,16 @@
   }
 
 </style>
+
+<style id="home-btn">
+  /* 왼쪽 상단 HOME: 처음 화면으로 */
+  .home-btn { position: absolute; top: 30px; left: 40px; z-index: 30;
+              font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 22px; line-height: 1;
+              letter-spacing: 0.04em; color: #000; text-decoration: none;
+              padding: 6px 10px; margin: -6px -10px; border: 1px solid transparent; }
+  .home-btn:hover { border-color: #000; }
+  .counter { left: 150px !important; }
+</style>
 </head>
 <body data-chapter="intro">
   <div class="stage">
@@ -389,6 +399,7 @@ PHYSICAL</div>
     
     <!-- Global HUD (moved outside canvas to avoid cropping) -->
     <div class="hud" id="hud"><span class="dot"></span><span id="hudLabel">CAM · AWAITING GESTURE</span></div>
+    <a class="home-btn" href="index.html">HOME</a>
     <div class="counter" id="counter">01 / 06</div>
     <div class="progress"><div class="bar" id="bar"></div></div>
 

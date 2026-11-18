@@ -362,6 +362,17 @@
   .mode-bar .m:nth-child(4) { left: 1306px; }
   .mode-bar .m.active { color: var(--fig-accent) !important; }
 </style>
+
+<style id="home-btn">
+  /* 왼쪽 상단 HOME: 처음 화면으로 */
+  .home-btn { position: absolute; top: 20px; left: 40px; z-index: 30;
+              font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 22px; line-height: 1;
+              letter-spacing: 0.04em; color: #000; text-decoration: none;
+              padding: 6px 10px; margin: -6px -10px; border: 1px solid transparent; }
+  .home-btn:hover { border-color: #000; }
+  .page-counter { left: 170px !important; }
+  .cam-btn { left: auto !important; right: 420px !important; }
+</style>
 </head>
 <body>
 
@@ -374,6 +385,7 @@
     <div class="particles-layer" id="particlesLayer"></div>
 
     <!-- HUD -->
+    <a class="home-btn" href="index.html">HOME</a>
     <div class="page-counter" id="pageCounter">01 / 03 · MAIN</div>
     <div class="hud" id="hud">
       <div class="dot"></div>
